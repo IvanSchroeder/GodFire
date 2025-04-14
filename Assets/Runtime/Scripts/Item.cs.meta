@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: e4b4b7722c65d674d8c111f2a0721f26
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - itemSprite: {instanceID: 0}
+  - dropShadowSprite: {instanceID: 0}
+  - ItemDespawnSeconds: {fileID: 11400000, guid: 6b1da7e3b04b91b459b2b2fce272f239, type: 2}
+  - <DragCollider>k__BackingField: {instanceID: 0}
+  - <BurnEffect>k__BackingField: {instanceID: 0}
+  - <SparkEffect>k__BackingField: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

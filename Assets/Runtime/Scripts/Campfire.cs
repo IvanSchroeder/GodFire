@@ -1,0 +1,256 @@
+using System.Collections.Generic;
+using ExtensionMethods;
+using UnityEngine;
+using WorldTime;
+using TMPro;
+using UnityEngine.UI;
+using UnityEngine.Rendering.Universal;
+
+public class Campfire : MonoBehaviour {
+    [SerializeField] Animator Anim;
+    [SerializeField] SpriteRenderer Sprite;
+    [SerializeField] AudioSource AmbienceSource;
+    [SerializeField] AudioSource SFXSource;
+    [SerializeField] ParticleSystem FireEffect;
+    [SerializeField] ParticleSystem.EmissionModule fireEmission;
+    [SerializeField] ParticleSystem SparkEffect;
+    [SerializeField] ParticleSystem SmokeEffect;
+    [SerializeField] Collider2D BurnCollider;
+    [SerializeField] Light2D MainLight;
+
+    [SerializeField] bool startsLit;
+    [SerializeField] bool startsBurnt;
+    [SerializeField] float currentHealth;
+    [SerializeField] float maxHealth;
+    [SerializeField] float currentFuelAmount;
+    [SerializeField] float maxFuelAmount;
+    [SerializeField] float baseFuelConsumptionRate;
+    [SerializeField] int baseFireAmount;
+    [SerializeField] AnimationCurve fireAmountCurve;
+    [SerializeField] float lightIntensity;
+    [SerializeField] float lightOuterRadius;
+    [SerializeField] Gradient healthColorGradient;
+    [SerializeField] Slider healthSlider;
+    [SerializeField] Image healthFillImage;
+    [SerializeField] Gradient fuelLitColorGradient;
+    [SerializeField] Gradient fuelUnlitColorGradient;
+    [SerializeField] Slider fuelSlider;
+    [SerializeField] Image fuelFillImage;
+
+    [SerializeField] bool isLit;
+    [SerializeField] bool isBurnt;
+    [SerializeField] bool isOutOfFuel;
+
+    public List<Item> BurningItemsList;
+
+    public readonly int LitHash = Animator.StringToHash("Lit");
+    public readonly int UnlitHash = Animator.StringToHash("Unlit");
+    public readonly int BurntHash = Animator.StringToHash("Burnt");
+
+    void Awake() {
+        fireEmission = FireEffect.emission;
+    }
+
+    void Start() {
+        BurningItemsList = new List<Item>();
+
+        if (startsLit) {
+            SetHealth(maxHealth);
+            SetFuel(maxFuelAmount);
+            LitFire();
+        }
+        else {
+            if (startsBurnt) {
+                SetFuel(0);
+                BurnCampfire(false);
+            }
+            else {
+                SetHealth(maxHealth);
+                SetFuel(maxFuelAmount);
+                UnlitFire();
+            }
+        }
+    }
+
+    void Update() {
+        ConsumeFuel();
+        UpdateHealthParameters();
+        UpdateFuelParameters();
+    }
+
+    void OnTriggerEnter2D(Collider2D collider) {
+        Item burnable = (Item)collider.gameObject.GetComponentInHierarchy<IBurnable>();
+
+        if (burnable != null) {
+            if (!isBurnt) {
+                AddFuel(burnable.GetFuelAmount());
+                if (isLit) {
+                    if (burnable.BurnsInstantly) {
+                        burnable.CompleteBurning();
+                        BurstSparks();
+                        burnable.DespawnObject();
+                    }
+                    else
+                        BurningItemsList.Add(burnable);
+                }
+                else if (!isLit) {
+                    burnable.DespawnObject();
+                }
+            }
+            else {
+                AddHealth(burnable.GetFuelAmount());
+                burnable.DespawnObject();
+            }
+        }
+    }
+
+    void OnTriggerStay2D(Collider2D collider) {
+        if (!isBurnt) {
+            foreach (Item burnable in BurningItemsList) {
+                burnable.StartBurn(Time.deltaTime * TimeManager.instance.timeSettings.timeMultiplier);
+
+                if (burnable.IsBurntOut) {
+                    BurningItemsList.Remove(burnable);
+                    BurstSparks();
+                    burnable.DespawnObject();
+                    break;
+                }
+            }
+        }
+    }
+
+    void OnTriggerExit2D(Collider2D collider) {
+        Item burnable = (Item)collider.gameObject.GetComponentInHierarchy<IBurnable>();
+
+        if (burnable != null) {
+            BurningItemsList.Remove(burnable);
+            burnable.EndBurn();
+        }
+    }
+
+    void ConsumeFuel() {
+        if (isBurnt || !isLit) return;
+        
+        if (!isOutOfFuel) {
+            AddFuel(-(baseFuelConsumptionRate
+                * (TimeManager.instance.isRaining ? TimeManager.instance.currentRainSettings.fuelConsuptionMultiplier : 1)
+                * TimeManager.instance.timeSettings.timeMultiplier
+                * Time.deltaTime));
+        }
+        else {
+            BurnCampfire();
+        }
+    }
+
+    public void CheckCampfireStatus() {
+        if (isBurnt) return;
+
+        if (!isLit) {
+            LitFire();
+        }
+        else if (isLit) {
+            UnlitFire();
+        }
+    }
+
+    void LitFire() {
+        isLit = true;
+        FireEffect.Play();
+        Anim.CrossFade(LitHash, 0f);
+        fuelSlider.gameObject.SetActive(true);
+        healthSlider.gameObject.SetActive(false);
+        SmokeEffect.Stop();
+        // BurnCollider.enabled = true;
+        BurstSparks();
+        AmbienceSource.Play();
+    }
+
+    void UnlitFire() {
+        isLit = false;
+        FireEffect.Stop();
+        Anim.CrossFade(UnlitHash, 0f);
+        fuelSlider.gameObject.SetActive(true);
+        healthSlider.gameObject.SetActive(false);
+        SmokeEffect.Play();
+        // BurnCollider.enabled = false;
+        AmbienceSource.Stop();
+    }
+
+    void BurnCampfire(bool burst = true) {
+        isLit = false;
+        isBurnt = true;
+        FireEffect.Stop();
+        Anim.CrossFade(BurntHash, 0f);
+        fuelSlider.gameObject.SetActive(false);
+        healthSlider.gameObject.SetActive(true);
+        SmokeEffect.Play();
+        // BurnCollider.enabled = false;
+        SetHealth(0f);
+        if (burst)
+            BurstSparks();
+        AmbienceSource.Stop();
+    }
+
+    void AddHealth(float healthAmount) {
+        SetHealth(currentHealth + healthAmount);
+        
+        UpdateHealthParameters();
+
+        if (currentHealth >= maxHealth) {
+            RestoreCampfire();
+        }
+    }
+
+    void SetHealth(float amount) {
+        currentHealth = amount;
+        currentHealth = currentHealth.Clamp(0, maxHealth);
+    }
+
+    void AddFuel(float fuelAmount) {
+        SetFuel(currentFuelAmount + fuelAmount);
+    }
+
+    void SetFuel(float amount) {
+        currentFuelAmount = amount;
+        currentFuelAmount = currentFuelAmount.Clamp(0, maxFuelAmount);
+    }
+
+    void RestoreCampfire() {
+        isBurnt = false;
+        SetFuel(maxFuelAmount / 2f);
+        UnlitFire();
+    }
+
+    void UpdateFuelParameters() {
+        float fuelPercentage = CalculateFuelPercentage();
+        fireEmission.rateOverTime = (fireAmountCurve.Evaluate(fuelPercentage) * baseFireAmount).ToInt();
+        MainLight.pointLightOuterRadius = lightOuterRadius;
+        MainLight.pointLightInnerRadius = (fireAmountCurve.Evaluate(fuelPercentage) * lightOuterRadius / 2).Clamp(0, lightOuterRadius);
+        fuelSlider.value = fuelPercentage;
+        fuelFillImage.color = isLit ? fuelLitColorGradient.Evaluate(fuelPercentage) : fuelUnlitColorGradient.Evaluate(fuelPercentage);
+    }
+
+    void UpdateHealthParameters() {
+        if (currentFuelAmount > 0)
+            isOutOfFuel = false;
+        else
+            isOutOfFuel = true;
+
+        float healthPercentage = CalculateHealthPercentage();
+        healthSlider.value = healthPercentage;
+        healthFillImage.color = healthColorGradient.Evaluate(healthPercentage);
+    }
+
+    void BurstSparks() {
+        SFXSource.PlayOneShot(AudioManager.instance.GetSFXClip("FireCrack", true));
+        SparkEffect.Play();
+    }
+
+    float CalculateHealthPercentage() {
+        return currentHealth % (maxHealth + 0.001f) / (maxHealth + 0.001f);
+    }
+
+    float CalculateFuelPercentage() {
+        return currentFuelAmount % (maxFuelAmount + 0.001f) / (maxFuelAmount + 0.001f);
+    }
+}
