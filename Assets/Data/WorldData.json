@@ -1,0 +1,17 @@
+{
+  "WorldName": null,
+  "WorldSeed": -1938786060,
+  "ChunkData": {
+    "ChunksDictionary": {}
+  },
+  "GeneratedHeightMap": false,
+  "HeightMap": {
+    "values": null,
+    "minValue": 0.0,
+    "maxValue": 1.0,
+    "falloffMap": null
+  },
+  "HeightValues": null,
+  "CreationTime": "2025-05-08T23:46:57.7811308-03:00",
+  "LastSavedTime": "2025-05-08T23:46:57.7907457-03:00"
+}

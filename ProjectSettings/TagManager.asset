@@ -47,6 +47,9 @@ TagManager:
   - name: MidGround
     uniqueID: 3788401969
     locked: 0
+  - name: Props
+    uniqueID: 4052938229
+    locked: 0
   - name: Entities
     uniqueID: 327716355
     locked: 0
