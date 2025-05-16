@@ -1,11 +1,14 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityUtilities;
 
 public static class HeightMapGenerator {
     public static HeightMap GenerateHeightMap(int width, int height, HeightMapSettings heightMapSettings, Vector2 sampleCenter) {
-        float[,] values = MyNoise.GenerateNoiseMap(width, height, heightMapSettings.noiseSettings, sampleCenter);
+        float[,] valuesMap = MyNoise.GenerateNoiseMap(width, height, heightMapSettings.noiseSettings, sampleCenter);
         float[,] falloffMap = MyNoise.GenerateFalloffMap(width, height, heightMapSettings);
-        // Color[] colorMap = new Color[width * height];
+
+        if (valuesMap.IsNull()) valuesMap = GenerateEmptyMap(width, height);
+        if (falloffMap.IsNull()) falloffMap = GenerateEmptyMap(width, height, 0);
 
         float minValue = float.MaxValue;
         float maxValue = float.MinValue;
@@ -13,19 +16,31 @@ public static class HeightMapGenerator {
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                values[x,y] = ((values[x,y] - (heightMapSettings.falloffSettings.useFalloffMap ? (falloffMap[x,y] * heightMapSettings.falloffSettings.falloffFactor) : 0))
-                    * heightCurve_threadSafe.Evaluate(values[x,y]) * heightMapSettings.noiseSettings.heightMultiplier).Clamp01().RoundTo(3);
+                valuesMap[x,y] = ((valuesMap[x,y] - (heightMapSettings.falloffSettings.useFalloffMap && falloffMap.IsNotNull() ? (falloffMap[x,y] * heightMapSettings.falloffSettings.falloffFactor) : 0))
+                    * heightCurve_threadSafe.Evaluate(valuesMap[x,y]) * heightMapSettings.noiseSettings.heightMultiplier).Clamp01().RoundTo(3);
                 
-                if (values[x,y] > maxValue) {
-                    maxValue = values[x,y];
+                if (valuesMap[x,y] > maxValue) {
+                    maxValue = valuesMap[x,y];
                 }
-                if (values[x,y] < minValue) {
-                    minValue = values[x,y];
+                if (valuesMap[x,y] < minValue) {
+                    minValue = valuesMap[x,y];
                 }
             }
         }
 
-        return new HeightMap(values, minValue, maxValue, falloffMap);
+        return new HeightMap(valuesMap, minValue, maxValue, falloffMap);
+    }
+
+    public static float[,] GenerateEmptyMap(int width, int height, float defaultValue = 0) {
+        float[,] emptyMap = new float[width,height];
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                emptyMap[x,y] = defaultValue;
+            }
+        }
+
+        return emptyMap;
     }
 
     public static Color[] GenerateColorMap(int width, int height, float[,] values, HeightMapSettings heightMapSettings) {
@@ -49,8 +64,8 @@ public static class HeightMapGenerator {
 
         return colorMap;
     }
-
-    public static float[,] GetMapValuesAt(float[,] worldValues, Vector2Int chunkLocalPos, int chunkSize) {
+    
+    public static float[,] GetMapValuesAt(float[,] worldValues, Vector2Int chunkGridPos, int chunkSize) {
         float[,] mapValues = new float[chunkSize,chunkSize];
 
         int totalTilesW = worldValues.GetLength(0);
@@ -61,7 +76,7 @@ public static class HeightMapGenerator {
         int halfHeightInChunks = (totalChunksH / 2);
 
         // Vector2Int sampleCenter = new Vector2Int(chunkLocalPos.x + halfWidthInChunks, chunkLocalPos.y + halfHeightInChunks);
-        Vector2Int sampleCenter = chunkLocalPos;
+        Vector2Int sampleCenter = chunkGridPos;
         // Debug.Log(sampleCenter);
 
         if ((sampleCenter.x * chunkSize > totalTilesW) || (sampleCenter.y * chunkSize > totalTilesH) || (sampleCenter.x < 0) || (sampleCenter.y < 0)) {
@@ -76,10 +91,55 @@ public static class HeightMapGenerator {
 
         return mapValues;
     }
+    
+
+    public static float[,] GetMapValuesInRange(float[,] worldValues, float minRange = 0, float maxRange = 1, bool minInclusive = true, bool maxInclusive = false, bool normalized = false) {
+        int xDim = worldValues.GetLength(0);
+        int yDim = worldValues.GetLength(1);
+
+        float[,] rangedValues = new float[xDim,yDim];
+
+        for (int y = 0; y < yDim; y++) {
+            for (int x = 0; x < xDim; x++) {
+                if ((minInclusive ? worldValues[x,y] >= minRange : worldValues[x,y] > minRange) &&
+                    (maxInclusive ? worldValues[x,y] <= maxRange : worldValues[x,y] < maxRange)) {
+                    rangedValues[x,y] = normalized ? 1 : worldValues[x,y];
+                }
+                else {
+                    rangedValues[x,y] = 0;
+                }
+            }
+        }
+
+        return rangedValues;
+    }
+
+    public static float[,] SetMapValuesAt(float[,] worldValues, float[,] overwriteValues, Vector2Int chunkGridPos, int chunkSize) {
+        float[,] modifiedMapValues = worldValues;
+
+        Vector2Int sampleCenter = chunkGridPos;
+        int i = 0;
+        int j = 0;
+
+        for (int y = 0; y < chunkSize; y++) {
+            for (int x = 0; x < chunkSize; x++) {
+                i = (sampleCenter.x * chunkSize) + x;
+                j = (sampleCenter.y * chunkSize) + y;
+
+                if (modifiedMapValues[i,j] != overwriteValues[i,j]) {
+                    modifiedMapValues[i,j] = overwriteValues[i,j];
+                }
+            }
+        }
+
+        return modifiedMapValues;
+    }
 }
 
 [System.Serializable]
 public struct HeightMap {
+    // public int xDim = 1;
+    // public int yDim = 1;
     public float[,] values;
     public float minValue;
     public float maxValue;

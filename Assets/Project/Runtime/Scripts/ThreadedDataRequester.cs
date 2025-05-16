@@ -31,21 +31,6 @@ public class ThreadedDataRequester : Singleton<ThreadedDataRequester> {
         }
     }
 
-    // public void RequestHeightMap(Vector2 center, Action<HeightMap> callback) {
-    //     ThreadStart threadStart = delegate {
-    //         HeightMapThread(center, callback);
-    //     };
-
-    //     new Thread(threadStart).Start();
-    // }
-
-    // void HeightMapThread(Vector2 center, Action<HeightMap> callback) {
-    //     HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(mapWidth, mapHeight, heightMapSettings, center);
-    //     lock (dataQueue) {
-    //         dataQueue.Enqueue(new ThreadInfo<HeightMap>(callback, heightMap));
-    //     }
-    // }
-
     struct ThreadInfo {
         public readonly Action<object> callback;
         public readonly object parameter;

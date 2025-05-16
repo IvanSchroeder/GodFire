@@ -10,17 +10,19 @@ public class Chunk {
     Vector3Int _gridPosition;
     Vector3Int _worldPosition;
     Vector3 _centerPosition;
-    BoundsInt chunkBounds;
+    BoundsInt _chunkBounds;
+
     public int chunkSize = 16;
-    public bool isLoaded = false;
+    [NonSerialized] public bool isLoaded = false;
     public bool isModified = false;
-    // public CustomTile[] tiles = new CustomTile[0];
+    [NonSerialized] public Tilemap groundTilemap;
+    [NonSerialized] public Tilemap waterTilemap;
+
     public Dictionary<Vector3Int, WorldTile> TilesInChunkDictionary;
-    public Dictionary<Vector3Int, WorldTile> ObjectsInChunkDictionary;
     public Dictionary<Vector3Int, Vector3Int> TilesInWorldGridPositionsDictionary;
-    public Tilemap groundTilemap;
-    public Tilemap waterTilemap;
-    public float[,] noiseValues = new float[0,0];
+    public float[,] localGroundNoiseValues;
+    // public TreeData treeData;
+
     TileBase[] nullArray;
     TileBase[] wArray;
     TileBase[] gArray;
@@ -72,14 +74,14 @@ public class Chunk {
         _centerPosition = new Vector3(_worldPosition.x + (_size / 2), _worldPosition.y + (_size / 2), 0);
         chunkSize = _size;
 
-        TilesInChunkDictionary = new Dictionary<Vector3Int, WorldTile>();
-        TilesInWorldGridPositionsDictionary = new Dictionary<Vector3Int, Vector3Int>();
+        TilesInChunkDictionary = new();
+        TilesInWorldGridPositionsDictionary = new();
 
-        chunkBounds = new BoundsInt(_worldPosition, new Vector3Int(chunkSize, chunkSize, 1));
+        _chunkBounds = new BoundsInt(_worldPosition, new Vector3Int(chunkSize, chunkSize, 1));
         // tiles = new CustomTile[chunkSize * chunkSize];
         isLoaded = true;
 
-        noiseValues = new float[chunkSize,chunkSize];
+        localGroundNoiseValues = new float[chunkSize,chunkSize];
 
         groundTilemap = _groundTilemap;
         waterTilemap = _waterTilemap;
@@ -116,8 +118,8 @@ public class Chunk {
             }
         }
 
-        waterTilemap.SetTilesBlock(chunkBounds, wArray);
-        groundTilemap.SetTilesBlock(chunkBounds, gArray);
+        waterTilemap.SetTilesBlock(_chunkBounds, wArray);
+        groundTilemap.SetTilesBlock(_chunkBounds, gArray);
 
         isLoaded = true;
     }
@@ -125,29 +127,10 @@ public class Chunk {
     public void Unload() {
         if (!isLoaded) return;
 
-        waterTilemap.SetTilesBlock(chunkBounds, nullArray);
-        groundTilemap.SetTilesBlock(chunkBounds, nullArray);
+        waterTilemap.SetTilesBlock(_chunkBounds, nullArray);
+        groundTilemap.SetTilesBlock(_chunkBounds, nullArray);
 
         isLoaded = false;
-    }
-
-    // public void LoopThroughTiles(Action<int, int, int> actionToPerform) {
-    //     for (int index = 0; index < tiles.Length; index++) {
-    //         var position = GetPositionFromIndex(index);
-    //         actionToPerform(position.x, position.y, position.z);
-    //     }
-    // }
-
-    Vector3Int GetPositionFromIndex(int index) {
-        int x = index % chunkSize;
-        int y = index / (chunkSize * chunkSize);
-        // int z = (index / chunkSize) % chunkSize;
-        int z = 0;
-        return new Vector3Int(x, y, z);
-    }
-
-    int GetIndexFromPosition(int x, int y) {
-        return (x * chunkSize) + y;
     }
 
     bool InRange(int axisCoordinate) {
@@ -166,11 +149,11 @@ public class Chunk {
         };
     }
 
-    public Vector3Int GetTileInChunkCoordinates(int x2, int y2, int z2) {
+    public Vector3Int GetTileInChunkCoordinates(int _x, int _y, int _z) {
         return new Vector3Int() {
-            x = x2 - _worldPosition.x,
-            y = y2 - _worldPosition.y,
-            z = z2 - _worldPosition.z
+            x = _x - _worldPosition.x,
+            y = _y - _worldPosition.y,
+            z = _z - _worldPosition.z
         };
     }
 
@@ -178,12 +161,12 @@ public class Chunk {
         return TilesInChunkDictionary.GetValueOrDefault(GetTileCoordinatesFromWorldCoordinates(new Vector3Int(x, y, z)));
     }
 
-    public WorldTile GetTileFromWorldCoordinates(Vector3 position) {
-        return TilesInChunkDictionary.GetValueOrDefault(GetTileCoordinatesFromWorldCoordinates(position));
+    public WorldTile GetTileFromWorldCoordinates(Vector3 tileWorldCoordinates) {
+        return TilesInChunkDictionary.GetValueOrDefault(GetTileCoordinatesFromWorldCoordinates(tileWorldCoordinates));
     }
 
-    public WorldTile GetTileFromWorldCoordinates(Vector3Int position) {
-        return TilesInChunkDictionary.GetValueOrDefault(GetTileCoordinatesFromWorldCoordinates(position));
+    public WorldTile GetTileFromWorldCoordinates(Vector3Int tileWorldCoordinates) {
+        return TilesInChunkDictionary.GetValueOrDefault(GetTileCoordinatesFromWorldCoordinates(tileWorldCoordinates));
     }
 
     public Vector3Int GetTileCoordinatesFromWorldCoordinates(Vector3 tileWorldCoordinates) {
@@ -194,35 +177,16 @@ public class Chunk {
         return TilesInWorldGridPositionsDictionary.GetValueOrDefault(tileWorldCoordinates);
     }
 
-    public float GetNoiseValueAt(Vector3Int tileCoordinates) {
-        return noiseValues[tileCoordinates.x, tileCoordinates.y];
-    }
+    public float[,] GetLocalNoiseValues() => localGroundNoiseValues;
+    public float GetLocalNoiseValueAt(Vector3Int tileCoordinates) => localGroundNoiseValues[tileCoordinates.x, tileCoordinates.y];
+    public float GetLocalNoiseValueAt(Vector3 tileWorldCoordinates) => GetLocalNoiseValueAt(GetTileCoordinatesFromWorldCoordinates(tileWorldCoordinates));
 
-    public float GetNoiseValueAt(Vector3 tileWorldCoordinates) {
-        return GetNoiseValueAt(GetTileCoordinatesFromWorldCoordinates(tileWorldCoordinates));
-    }
-
-    // public CustomTile GetTileFromChunkCoordinates(int x, int y, int z = 0) {
-    //     if (InRange(x) && InRange(y)) {
-    //         int index = GetIndexFromPosition(x, y);
-    //         return tiles[index];
-    //     }
-
-    //     throw new Exception("Tile not found");
-    // }
-
-    // public CustomTile GetTileFromChunkCoordinates(Vector3Int chunkCoordinates) {
-    //     return GetTileFromChunkCoordinates(chunkCoordinates.x, chunkCoordinates.y, chunkCoordinates.z);
-    // }
-
-    public void SetTile(Vector3Int _localPosition, WorldTile customTile, float noiseValue) {
+    public void SaveTile(Vector3Int _localPosition, WorldTile customTile, float noiseValue) {
         if (InRange(_localPosition.x) && InRange(_localPosition.y)) {
-            // int index = GetIndexFromPosition(_localPosition.x, _localPosition.y);
-            // tiles[index] = customTile;
             Vector3Int tilePosInWorldGrid = _worldPosition + _localPosition;
             TilesInChunkDictionary.AddOrReplace(_localPosition, customTile);
             TilesInWorldGridPositionsDictionary.AddOrReplace(tilePosInWorldGrid, _localPosition);
-            noiseValues[_localPosition.x, _localPosition.y] = noiseValue;
+            localGroundNoiseValues[_localPosition.x, _localPosition.y] = noiseValue;
 
             PaintTile(customTile, tilePosInWorldGrid);
         }

@@ -3,34 +3,40 @@ using System.Linq;
 using UnityUtilities;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using System;
 
 public class BiomeGenerator : MonoBehaviour {
     public NoiseSettings biomeNoiseSettings;
-    public DomainWarping domainWarping;
     public WorldTile defaultTile;
 
-    public List<WorldTile> TilesList = new List<WorldTile>();
-    Dictionary<TileType, WorldTile> WorldTilesDictionary = new Dictionary<TileType, WorldTile>();
+    public List<WorldTile> TilesList = new();
+    Dictionary<TileType, WorldTile> WorldTilesDictionary = new();
+    public SerializedDictionary<WorldTile, int> WorldTilesCountDictionary = new();
 
     void Awake() {
-        WorldTilesDictionary = new Dictionary<TileType, WorldTile>();
+        WorldTilesDictionary = new();
+        WorldTilesCountDictionary = new();
 
         foreach (WorldTile tile in TilesList) {
             WorldTilesDictionary.AddIfNotExists(tile.type, tile);
+            WorldTilesCountDictionary.AddIfNotExists(tile, 0);
         }
     }
 
     public Chunk ProcessChunkColumn(Chunk chunk, int x, int y, float heightValue, HeightMapSettings heightMapSettings) {
         WorldTile customTile = DetermineWorldTile(heightValue, heightMapSettings);
         
-        chunk.SetTile(new Vector3Int(x, y, 0), customTile, heightValue);
+        chunk.SaveTile(new Vector3Int(x, y, 0), customTile, heightValue);
+        
         return chunk;
     }
 
     WorldTile DetermineWorldTile(float heightValue, HeightMapSettings heightMapSettings) {
         for (int i = 0; i < heightMapSettings.regionData.RegionsList.Count; i++) {
             if (heightValue <= heightMapSettings.regionData.RegionsList.GetElement(i).height) {
-                return heightMapSettings.regionData.RegionsList.GetElement(i).worldTile;
+                WorldTile worldTile = heightMapSettings.regionData.RegionsList.GetElement(i).worldTile;
+                WorldTilesCountDictionary.AddOrReplace(worldTile, WorldTilesCountDictionary.GetValueOrDefault(worldTile) + 1);
+                return worldTile;
             }
             else {
                 continue;

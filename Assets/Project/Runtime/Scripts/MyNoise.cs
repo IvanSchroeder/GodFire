@@ -58,10 +58,10 @@ public static class MyNoise {
         float frequency = settings.frequency;
 
         for (int i = 0; i < settings.octaves; i++) {
-            float offsetX = Random.Range(-100000, 100000);
-            float offsetY = Random.Range(-100000, 100000);
+            float xOffset = Random.Range(-100000, 100000) * (mapWidth / settings.scale);
+            float yOffset = Random.Range(-100000, 100000) * (mapHeight / settings.scale);
 
-            octaveOffsets[i] = new Vector2(offsetX, offsetY);
+            octaveOffsets[i] = new Vector2(xOffset / mapWidth, yOffset / mapHeight);
 
             maxPossibleHeight += amplitude;
             amplitude *= settings.persistance;
@@ -81,10 +81,11 @@ public static class MyNoise {
                 float superpositionCompensation = 0;
 
                 for (int i = 0; i < settings.octaves; i++) {
-                    float sampleX = (x - halfWidth - settings.offset.x + sampleCenter.x) / settings.scale * frequency + octaveOffsets[i].x;
-                    float sampleY = (y - halfHeight - settings.offset.y + sampleCenter.y) / settings.scale * frequency + octaveOffsets[i].y;
+                    float sampleX = (x - halfWidth - settings.offset.x + sampleCenter.x) / settings.scale * frequency + (octaveOffsets[i].x * frequency);
+                    float sampleY = (y - halfHeight - settings.offset.y + sampleCenter.y) / settings.scale * frequency + (octaveOffsets[i].y * frequency);
 
-                    float perlinValue = Mathf.PerlinNoise(sampleX, sampleY) * 2 - 1;
+                    // float perlinValue = Mathf.PerlinNoise(sampleX, sampleY) * 2 - 1;
+                    float perlinValue = Mathf.PerlinNoise(sampleX, sampleY);
                     noiseHeight += perlinValue * amplitude;
                     noiseHeight -= superpositionCompensation;
 
@@ -167,7 +168,7 @@ public static class MyNoise {
                 dy = height / 2 - j - offsetFalloffY;
                 d = Mathf.Sqrt(dx.PowerOf(2) + dy.PowerOf(2));
                 float value = (heightMapSettings.falloffSettings.radialFalloffRadius - (2 * d / maxD)) * -1;
-                falloffMap[i,j] = value;
+                falloffMap[i,j] = FalloffEvaluation(value, steepness, shift);
 
                 // float x = i / (float)width * 2 - offsetFalloffX;
                 // float y = j / (float)height * 2 - offsetFalloffY;

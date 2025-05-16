@@ -4,8 +4,17 @@ using UnityEngine;
 using WorldSimulation;
 using UnityEngine.UI;
 using UnityEngine.Rendering.Universal;
+using System;
 
-public class Campfire : MonoBehaviour {
+public interface IGridObject {
+    Vector2Int Size { get; set; }
+    Vector3Int GridPosition { get; set; }
+    Vector3 WorldPosition { get; set; }
+}
+
+public class Campfire : MonoBehaviour, IGridObject {
+    [Header("References")]
+    [Space(5f)]
     [SerializeField] Animator Anim;
     [SerializeField] SpriteRenderer Sprite;
     [SerializeField] AudioSource AmbienceSource;
@@ -16,6 +25,15 @@ public class Campfire : MonoBehaviour {
     [SerializeField] ParticleSystem SmokeEffect;
     [SerializeField] Collider2D BurnCollider;
     [SerializeField] Light2D MainLight;
+    [SerializeField] Canvas worldCanvas;
+    [SerializeField] Slider healthSlider;
+    [SerializeField] Image healthFillImage;
+    [SerializeField] Slider fuelSlider;
+    [SerializeField] Image fuelFillImage;
+
+    [Space(10f)]
+    [Header("Parameters")]
+    [Space(5f)]
 
     [SerializeField] bool startsLit;
     [SerializeField] bool startsBurnt;
@@ -30,28 +48,33 @@ public class Campfire : MonoBehaviour {
     [SerializeField] float lightIntensity;
     [SerializeField] float lightOuterRadius;
     [SerializeField] Gradient healthColorGradient;
-    [SerializeField] Slider healthSlider;
-    [SerializeField] Image healthFillImage;
     [SerializeField] Gradient fuelLitColorGradient;
     [SerializeField] Gradient fuelUnlitColorGradient;
-    [SerializeField] Slider fuelSlider;
-    [SerializeField] Image fuelFillImage;
 
     [SerializeField] bool isLit;
     [SerializeField] bool isBurnt;
     [SerializeField] bool isOutOfFuel;
 
     public List<Item> BurningItemsList;
+    public Queue<Item> BurningItemsQueue;
 
     public readonly int LitHash = Animator.StringToHash("Lit");
     public readonly int UnlitHash = Animator.StringToHash("Unlit");
     public readonly int BurntHash = Animator.StringToHash("Burnt");
+
+    [Header("Grid Parameters")]
+
+    [property: SerializeField] public Vector2Int Size { get => Size; set => Size = value; }
+    [property: SerializeField] public Vector3Int GridPosition { get => GridPosition; set => GridPosition = value; }
+    [property: SerializeField] public Vector3 WorldPosition { get => WorldPosition; set => WorldPosition = value; }
 
     void Awake() {
         fireEmission = FireEffect.emission;
     }
 
     void Start() {
+        worldCanvas.worldCamera = this.GetMainCamera();
+
         BurningItemsList = new List<Item>();
 
         if (startsLit) {
@@ -129,9 +152,9 @@ public class Campfire : MonoBehaviour {
     }
 
     void ConsumeFuel() {
-        if (isBurnt || !isLit) return;
+        if (isBurnt || !isLit || !consumeFuel) return;
         
-        if (!isOutOfFuel && consumeFuel) {
+        if (!isOutOfFuel) {
             AddFuel(-(baseFuelConsumptionRate
                 * (WeatherManager.Instance.IsRaining && WeatherManager.Instance.CurrentWeatherSettings.IsNotNull() ? WeatherManager.Instance.CurrentWeatherSettings.fuelConsuptionMultiplier : 1)
                 * (TimeManager.Instance.CurrentTimeSettings.IsNotNull() ? TimeManager.Instance.InGameDeltaTime : Time.deltaTime)

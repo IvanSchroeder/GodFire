@@ -4,39 +4,53 @@ using UnityUtilities;
 
 [CustomEditor(typeof(WorldGenerator))]
 public class WorldGeneratorEditor : Editor {
+    WorldGenerator worldGenerator;
+
     public override void OnInspectorGUI() {
-        WorldGenerator worldGenerator = (WorldGenerator)target;
+        worldGenerator = (WorldGenerator)target;
 
-        DrawDefaultInspector();
-
-        if (GUILayout.Button("Create and Generate World")) {
-            worldGenerator.CreateAndGenerateNewWorld();
-            EditorUtility.SetDirty(target);
+        if (DrawDefaultInspector()) {
+            if (worldGenerator.mapPreview.autoUpdate) {
+                worldGenerator.PreviewWorld();
+            }
         }
 
-        if (GUILayout.Button("Generate World")) {
-            worldGenerator.GenerateWorld();
-            EditorUtility.SetDirty(target);
+        if (GUILayout.Button("Preview World")) {
+            worldGenerator.PreviewWorld();
         }
 
         if (GUILayout.Button("Create World Data")) {
-            worldGenerator.CreateNewWorldData();
-            EditorUtility.SetDirty(target);
+            worldGenerator.CreateData();
         }
 
         if (GUILayout.Button("Load World Data")) {
-            worldGenerator.LoadWorldData();
-            EditorUtility.SetDirty(target);
+            worldGenerator.LoadData();
         }
 
         if (GUILayout.Button("Save World Data")) {
-            worldGenerator.SaveWorldData();
-            EditorUtility.SetDirty(target);
+            worldGenerator.SaveData();
         }
 
         if (GUILayout.Button("Delete World Data")) {
-            worldGenerator.DeleteWorldData();
-            EditorUtility.SetDirty(target);
+            worldGenerator.DeleteData();
         }
+
+        EditorUtility.SetDirty(target);
     }
+
+    // public void PreviewWorld() {
+    //     worldGenerator.SetWorldOffset();
+
+    //     HeightMap heightMap;
+
+    //     if (worldGenerator.HeightMap.values == null) {
+    //         heightMap = HeightMapGenerator.GenerateHeightMap(worldGenerator.totalWidthTiles, worldGenerator.totalHeightTiles, worldGenerator.heightMapSettings, worldGenerator.sampleCenter);
+    //         worldGenerator.HeightMap = heightMap;
+    //     }
+    //     else {
+    //         heightMap = worldGenerator.HeightMap;
+    //     }
+
+    //     worldGenerator.mapPreview.DrawMapInEditor(worldGenerator.totalWidthTiles, worldGenerator.totalHeightTiles, heightMap, worldGenerator.heightMapSettings);
+    // }
 }

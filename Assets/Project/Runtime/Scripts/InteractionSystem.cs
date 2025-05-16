@@ -132,7 +132,7 @@ public class InteractionSystem : Singleton<InteractionSystem> {
             .GetChunkAt(WorldDataHelper.ChunkIDFromChunkPosition(WorldGenerator.Instance.chunkSize, chunkPos));
 
         if (chunk.IsNotNull())
-            SelectedTileHeightValueText.text = $"Selected Tile Height: {chunk.GetNoiseValueAt(_mouseCellPosition - chunk.WorldPosition):f2}";
+            SelectedTileHeightValueText.text = $"Selected Tile Height: {chunk.GetLocalNoiseValueAt(_mouseCellPosition - chunk.WorldPosition):f3}";
         else if (!selectedCellGrid.enabled)
             SelectedTileHeightValueText.text = $"Selected Tile Height: -,-";
     }

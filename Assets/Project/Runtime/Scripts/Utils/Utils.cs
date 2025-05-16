@@ -2210,6 +2210,146 @@ namespace UnityUtilities {
 				return actual.CompareTo(lower) >= 0 && actual.CompareTo(upper) < 0;
 			}
 		#endregion
+
+		#region Algorithms
+			// Spiral array
+			// int chunksToSpawn = worldWidthInChunks * worldHeightInChunks;
+			// int sequence = chunksToSpawn;
+			// const int x = 0;
+			// const int y = 1;
+			// int[,] matrix = new int [2, sequence];
+			// int dirX, dirY, prevX, prevY, curr;
+			// dirX = dirY = prevX = prevY = default;
+
+			// for (curr = 0; curr < sequence; curr++) {
+			//     if (curr > 0) {
+			//         prevX = matrix[x, curr - 1];
+			//         prevY = matrix[y, curr - 1];
+			//     }
+
+			//     if (Mathf.Abs(prevX) == Mathf.Abs(prevY) && curr > 0) {
+			//         dirX = dirY = 0;
+
+			//         if (prevY > 0 && prevX > 0) dirX = -1;
+			//         else if (prevY > 0 && prevX < 0) dirY = -1;
+			//         else if (prevY < 0 && prevX < 0) dirX = 1;
+			//         else if (prevY < 0 && prevX > 0) dirX = 1;
+			//         else if (prevY == 0 && prevX == 0) dirX = 1;
+			//     }
+			//     else if (prevY < 0 && prevX > 0 && (Mathf.Abs(matrix[x, curr - 2]) == Mathf.Abs(matrix[y, curr -2]))) {
+			//         dirX = 0;
+			//         dirY = 1;
+			//     }
+			//     else if (prevX == 1 && prevY == 0) {
+			//         dirX = 0;
+			//         dirY = 1;
+			//     }
+
+			//     matrix[x, curr] = prevX + dirX;
+			//     matrix[y, curr] = prevY + dirY;
+
+			//     chunkLocalPos = new Vector3Int(matrix[x, curr], matrix[y, curr], 0);
+
+			//     chunk = ChunkData.CreateChunk(chunk, chunkLocalPos, chunkSize, GroundTilemap, WaterTilemap, false);
+			//     chunk = terrainGenerator.GenerateTerrainChunk(chunk, heightMap, heightMapSettings);
+			// }
+
+			private static void TraverseSpiralExpand<T>(T[,] matrix, Action<T> action) {
+			    var length = matrix.GetLength(0);
+			    if (length != matrix.GetLength(1)) {
+			        throw new InvalidDataException("SpiralExpand only supported on Square Matrix.");
+			    }
+
+			    // starting point
+			    var x = (length - 1) / 2;
+			    var y = (length - 1) / 2;
+
+			    // 0=>x++, 1=>y++, 2=>x--, 3=>y--
+			    var direction = 0;
+
+			    action(matrix[x, y]);
+			    for (var chainSize = 1; chainSize < length; chainSize++) {
+			        for (var j = 0; j < (chainSize < length - 1 ? 2 : 3); j++) {
+			            for (var i = 0; i < chainSize; i++) {
+			                switch (direction) {
+			                    case 0:
+			                        x++;
+			                        break;
+			                    case 1:
+			                        y++;
+			                        break;
+			                    case 2:
+			                        x--;
+			                        break;
+			                    case 3:
+			                        y--;
+			                        break;
+			                }
+			                action(matrix[x, y]);
+			            }
+			            direction = (direction + 1) % 4;
+			        }
+			    }
+			}
+
+			// private static Point[] TraverseSpiral(int width, int height) {
+			//     int numElements = width * height + 1;
+			//     Point[] points = new Point[numElements];
+
+			//     int x = 0;
+			//     int y = 0;
+			//     int dx = 1;
+			//     int dy = 0;
+			//     int xLimit = width - 0;
+			//     int yLimit = height - 1;
+			//     int counter = 0;
+
+			//     int currentLength = 1;
+			//     while (counter < numElements) {
+			//         points[counter] = new Point(x, y);
+
+			//         x += dx;
+			//         y += dy;
+
+			//         currentLength++;
+			//         if (dx > 0) {
+			//             if (currentLength >= xLimit) {
+			//                 dx = 0;
+			//                 dy = 1;
+			//                 xLimit--;
+			//                 currentLength = 0;
+			//             }
+			//         } else if (dy > 0) {
+			//             if (currentLength >= yLimit) {
+			//                 dx = -1;
+			//                 dy = 0;
+			//                 yLimit--;
+			//                 currentLength = 0;
+			//             }
+			//         } else if (dx < 0) {
+			//             if (currentLength >= xLimit) {
+			//                 dx = 0;
+			//                 dy = -1;
+			//                 xLimit--;
+			//                 currentLength = 0;
+			//             }
+			//         } else if (dy < 0) {
+			//             if (currentLength >= yLimit) {
+			//                 dx = 1;
+			//                 dy = 0;
+			//                 yLimit--;
+			//                 currentLength = 0;
+			//             }
+			//         }
+
+			//         counter++;
+			//     }
+
+			//     Array.Reverse(points);
+			//     return points;
+			// }
+
+		#endregion
 	#endregion
 	}
 }
