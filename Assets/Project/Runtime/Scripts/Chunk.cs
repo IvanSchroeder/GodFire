@@ -14,14 +14,14 @@ public class Chunk {
 
     public int chunkSize = 16;
     [NonSerialized] public bool isLoaded = false;
+    [NonSerialized] public bool firstTimeLoading = true;
     public bool isModified = false;
     [NonSerialized] public Tilemap groundTilemap;
     [NonSerialized] public Tilemap waterTilemap;
 
     public Dictionary<Vector3Int, WorldTile> TilesInChunkDictionary;
     public Dictionary<Vector3Int, Vector3Int> TilesInWorldGridPositionsDictionary;
-    public float[,] localGroundNoiseValues;
-    // public TreeData treeData;
+    public float[,] localNoiseValues;
 
     TileBase[] nullArray;
     TileBase[] wArray;
@@ -81,7 +81,7 @@ public class Chunk {
         // tiles = new CustomTile[chunkSize * chunkSize];
         isLoaded = true;
 
-        localGroundNoiseValues = new float[chunkSize,chunkSize];
+        localNoiseValues = new float[chunkSize,chunkSize];
 
         groundTilemap = _groundTilemap;
         waterTilemap = _waterTilemap;
@@ -177,16 +177,16 @@ public class Chunk {
         return TilesInWorldGridPositionsDictionary.GetValueOrDefault(tileWorldCoordinates);
     }
 
-    public float[,] GetLocalNoiseValues() => localGroundNoiseValues;
-    public float GetLocalNoiseValueAt(Vector3Int tileCoordinates) => localGroundNoiseValues[tileCoordinates.x, tileCoordinates.y];
+    public float[,] GetLocalNoiseValues() => localNoiseValues;
+    public float GetLocalNoiseValueAt(Vector2Int tileCoordinates) => localNoiseValues[tileCoordinates.x, tileCoordinates.y];
+    public float GetLocalNoiseValueAt(int x, int y) => localNoiseValues[x, y];
     public float GetLocalNoiseValueAt(Vector3 tileWorldCoordinates) => GetLocalNoiseValueAt(GetTileCoordinatesFromWorldCoordinates(tileWorldCoordinates));
 
-    public void SaveTile(Vector3Int _localPosition, WorldTile customTile, float noiseValue) {
+    public void SaveTile(Vector3Int _localPosition, WorldTile customTile) {
         if (InRange(_localPosition.x) && InRange(_localPosition.y)) {
             Vector3Int tilePosInWorldGrid = _worldPosition + _localPosition;
             TilesInChunkDictionary.AddOrReplace(_localPosition, customTile);
             TilesInWorldGridPositionsDictionary.AddOrReplace(tilePosInWorldGrid, _localPosition);
-            localGroundNoiseValues[_localPosition.x, _localPosition.y] = noiseValue;
 
             PaintTile(customTile, tilePosInWorldGrid);
         }

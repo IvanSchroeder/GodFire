@@ -11,14 +11,9 @@ public class CameraManager : Singleton<CameraManager> {
 
     [Header("Grid Settings")]
     [Space(5f)]
-    [SerializeField] SpriteRenderer cameraGrid;
-    [SerializeField] bool renderGrid = true;
-    [SerializeField] bool snapGrid = true;
-    [SerializeField] float gridSmoothness = 10f;
-    [SerializeField] Vector3 cameraGridOffset;
-    [SerializeField] Vector3 chunkGridOffset;
-    [SerializeField] bool renderChunkGrid = true;
-    [SerializeField] SpriteRenderer chunkGrid;
+
+    [SerializeField] GridVisualization cameraGridVisualization;
+    [SerializeField] GridVisualization chunkGridVisualization;
 
     [Header("Panning Settings")]
     [Space(5f)]
@@ -27,6 +22,7 @@ public class CameraManager : Singleton<CameraManager> {
     public float cameraAltitude = 10f;
     [Range(1f, 3f)] public float horizontalPanningFactor = 1f;
     [Range(1f, 3f)] public float verticalPanningFactor = 2f;
+    public bool limitCamera = true;
 
     [Space(10f)]
 
@@ -113,6 +109,8 @@ public class CameraManager : Singleton<CameraManager> {
         HandleChunkGrid();
     }
 
+    public float widthBuffer = 2f;
+    public float heightBuffer = 2f;
 
     void CalculatePanning() {
         _isDraggingCamera = Input.GetMouseButton(1) && canDrag;
@@ -131,7 +129,24 @@ public class CameraManager : Singleton<CameraManager> {
             _cameraTargetPosition += (_cameraMoveDirection * panSpeed * Mathf.InverseLerp(1f * _currentZoom, 0.001f * _currentZoom, CalculatePercentOfZoom(_currentZoom)) * Time.deltaTime).ToVector3().With(z: -cameraAltitude);
         }
 
-        // _cameraTargetPosition = _cameraTargetPosition.Clamp(new Vector3(-20, -20, -cameraAltitude), new Vector3(20, 20, -cameraAltitude));
+        float xMin = WorldGenerator.Instance.limitW.x;
+        float xMax = WorldGenerator.Instance.limitE.x;
+        float yMin = WorldGenerator.Instance.limitS.y;
+        float yMax = WorldGenerator.Instance.limitN.y;
+
+        float xMinLimited = xMin + widthBuffer;
+        float xMaxLimited = xMax - widthBuffer;
+        float yMinLimited = yMin + heightBuffer;
+        float yMaxLimited = yMax - heightBuffer;
+
+        if (limitCamera) {
+            _cameraTargetPosition = new Vector3(
+                Mathf.Max(Mathf.Min(_cameraTargetPosition.x, xMaxLimited), xMinLimited),
+                Mathf.Max(Mathf.Min(_cameraTargetPosition.y, yMaxLimited), yMinLimited),
+                -cameraAltitude
+            );
+        }
+        
         _cameraWorldPosition = Vector3.SmoothDamp(_cameraWorldPosition, _cameraTargetPosition, ref _cameraVelocity, (_isDraggingCamera ? dragSmoothness : panSmoothness) * Time.deltaTime).With(z: -cameraAltitude);;
         _cameraWorldPosition = _cameraWorldPosition.With(
             x: float.IsNaN(_cameraWorldPosition.x) || float.IsInfinity(_cameraWorldPosition.x) ? 0 : _cameraWorldPosition.x,
@@ -189,25 +204,25 @@ public class CameraManager : Singleton<CameraManager> {
     }
 
     void HandleCameraGrid() {
-        if (renderGrid) {
-            cameraGrid.enabled = true;
-            Vector3 targetPosition = snapGrid ? (WorldGenerator.instance.GroundTilemap.CellToWorld(_cameraTilePosition) + cameraGridOffset).With(z: 0) : _cameraWorldPosition.With(z: 0);
-            cameraGrid.transform.position = Vector3.SmoothDamp(cameraGrid.transform.position, targetPosition, ref _gridVelocity, gridSmoothness * Time.deltaTime);
-        }
-        else {
-            cameraGrid.enabled = false;
-        }
+        // if (renderGrid) {
+        //     cameraGrid.enabled = true;
+        //     Vector3 targetPosition = snapGrid ? (WorldGenerator.instance.GroundTilemap.CellToWorld(_cameraTilePosition) + cameraGridOffset).With(z: 0) : _cameraWorldPosition.With(z: 0);
+        //     cameraGrid.transform.position = Vector3.SmoothDamp(cameraGrid.transform.position, targetPosition, ref _gridVelocity, gridSmoothness * Time.deltaTime);
+        // }
+        // else {
+        //     cameraGrid.enabled = false;
+        // }
     }
 
     void HandleChunkGrid() {
-        if (renderChunkGrid) {
-            chunkGrid.enabled = true;
-            Vector3 targetPosition = (_cameraChunkCenterPosition + chunkGridOffset).With(z: 0);
-            chunkGrid.transform.position = targetPosition;
-            chunkGrid.transform.localScale = new Vector3Int(WorldGenerator.instance.chunkSize, WorldGenerator.instance.chunkSize / 2);
-        }
-        else {
-            chunkGrid.enabled = false;
-        }
+        // if (renderChunkGrid) {
+        //     chunkGrid.enabled = true;
+        //     Vector3 targetPosition = (_cameraChunkCenterPosition + chunkGridOffset).With(z: 0);
+        //     chunkGrid.transform.position = targetPosition;
+        //     chunkGrid.transform.localScale = new Vector3Int(WorldGenerator.instance.chunkSize, WorldGenerator.instance.chunkSize / 2);
+        // }
+        // else {
+        //     chunkGrid.enabled = false;
+        // }
     }
 }

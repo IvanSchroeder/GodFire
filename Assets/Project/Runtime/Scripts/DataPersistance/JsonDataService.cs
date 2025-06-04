@@ -2,7 +2,9 @@ using UnityEngine;
 using System;
 using System.IO;
 using Newtonsoft.Json;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 
 namespace SaveSystem {
     public class JsonDataService : IDataService {
@@ -20,11 +22,18 @@ namespace SaveSystem {
                     Debug.Log("Writing file for the first time!");
                 }
 
-                using FileStream stream = File.Create(path);
-                stream.Close();
-                File.WriteAllText(path, JsonConvert.SerializeObject(Data, Formatting.Indented));
+                // using FileStream stream = File.Create(path);
+                // stream.Close();
+                JsonSerializerSettings settings = new JsonSerializerSettings() {
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                };
 
+                string json = JsonConvert.SerializeObject(Data, Formatting.Indented, settings);
+                File.WriteAllText(path, json);
+
+            #if UNITY_EDITOR
                 AssetDatabase.Refresh();
+            #endif
 
                 return true;
             }
@@ -35,7 +44,9 @@ namespace SaveSystem {
         }
 
         public T LoadData<T>(string directory, string relativePath) {
-            AssetDatabase.Refresh();
+            #if UNITY_EDITOR
+                AssetDatabase.Refresh();
+            #endif
             
             string path = SetDataPath(directory, relativePath, fileSuffix);
 
@@ -66,7 +77,9 @@ namespace SaveSystem {
             try {
                 Debug.Log("Data exists, Deleting old file!");
                 File.Delete(path);
+                #if UNITY_EDITOR
                 AssetDatabase.Refresh();
+                #endif
                 return true;
             }
             catch (Exception e) {

@@ -12,7 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b05dd32bda784ff47aabafd1cb363967, type: 3}
   m_Name: Water
   m_EditorClassIdentifier: 
+  tileName: Shallow Water
+  id: 1
   tile: {fileID: 11400000, guid: c26992893fdbd4647a0f2d07068c5036, type: 2}
-  id: Water
   type: 1
   targetTilemap: 0
+  color: {r: 0.5137255, g: 0.87843144, b: 0.909804, a: 1}

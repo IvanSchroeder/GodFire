@@ -27,7 +27,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0.0625, z: 0}
-  m_LocalScale: {x: 0.25, y: 1, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3244782372678811550}
@@ -73,9 +73,9 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: -1352009
-  m_SortingLayer: 1
-  m_SortingOrder: 1
+  m_SortingLayerID: -242029067
+  m_SortingLayer: 3
+  m_SortingOrder: -1
   m_Sprite: {fileID: 2868101353237766674, guid: ea78b7467ca99c84eb8f5817d195c1a8, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -137,18 +137,9 @@ MonoBehaviour:
   itemSprite: {fileID: 5415520568057172121}
   dropShadowSprite: {fileID: 441019712941499394}
   ItemDespawnSeconds: {fileID: 11400000, guid: 6b1da7e3b04b91b459b2b2fce272f239, type: 2}
+  spriteOffset: 0.25
   <DragCollider>k__BackingField: {fileID: 496848124488770353}
-  <PickupOffset>k__BackingField: {x: 0, y: 0.5}
-  <Velocity>k__BackingField: 15
-  <PickupSpeed>k__BackingField: 15
-  <FallDuration>k__BackingField: 0.5
-  <PickupScale>k__BackingField: {x: 1.2, y: 1.2}
-  <ScaleSpeed>k__BackingField: 0.3
-  <PickupVibrato>k__BackingField: 1
-  <PickupElasticity>k__BackingField: 5
-  <RotateItemOnPickup>k__BackingField: 1
-  <RotationAmount>k__BackingField: 15
-  <RotationSpeed>k__BackingField: 50
+  <DraggableSettings>k__BackingField: {fileID: 11400000, guid: 88b7cf5603edb3a4ca6f061d03cb4a2a, type: 2}
   <IsBurning>k__BackingField: 0
   <IsBurntOut>k__BackingField: 0
   <BurnsInstantly>k__BackingField: 1
@@ -230,7 +221,7 @@ Transform:
   m_GameObject: {fileID: 6811587297868260554}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0.25, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -277,11 +268,11 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: -506565327
-  m_SortingLayer: 2
+  m_SortingLayerID: -242029067
+  m_SortingLayer: 3
   m_SortingOrder: 0
   m_Sprite: {fileID: 4842329817961842003, guid: 8ea7c596b389aee41bc56c22e479ff52, type: 3}
-  m_Color: {r: 1, g: 0.57254905, b: 0.36470592, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0

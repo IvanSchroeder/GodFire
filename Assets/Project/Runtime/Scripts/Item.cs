@@ -3,29 +3,22 @@ using DG.Tweening;
 using UnityUtilities;
 using UnityEngine;
 
+[Serializable]
 public class Item : MonoBehaviour, IDraggable, IBurnable {
     [SerializeField] SpriteRenderer itemSprite;
     [SerializeField] SpriteRenderer dropShadowSprite;
     [SerializeField] FloatSO ItemDespawnSeconds;
+    [SerializeField] float spriteOffset = 0.25f;
 
     [Header("Drag Parameters")]
     [field: SerializeField] public Collider2D DragCollider { get; set; }
+    [field: SerializeField] public DraggableSettingsSO DraggableSettings { get; set; }
+
     public bool IsDragging { get; set; }
     public bool IsTouchingGround { get; set; }
-    [field: SerializeField] public Vector2 PickupOffset { get; set; }
     public float DistanceToFloor { get; set; }
-    [field: SerializeField] public float Velocity { get; set; }
-    [field: SerializeField] public float PickupSpeed { get; set; }
-    [field: SerializeField] public float FallDuration { get; set; }
-    [field: SerializeField] public Vector2 PickupScale { get; set; }
-    [field: SerializeField] public float ScaleSpeed { get; set; }
-    [field: SerializeField] public int PickupVibrato { get; set; }
-    [field: SerializeField] public float PickupElasticity { get; set; }
-    [field: SerializeField] public bool RotateItemOnPickup { get; set; }
     public Vector2 MovementDelta { get; set; }
     public Vector2 RotationDelta { get; set; }
-    [field: SerializeField] public float RotationAmount { get; set; }
-    [field: SerializeField] public float RotationSpeed { get; set; }
 
     [Header("Burn Parameters")]
     [field: SerializeField] public bool IsBurning { get; set; }
@@ -38,6 +31,7 @@ public class Item : MonoBehaviour, IDraggable, IBurnable {
     [field: SerializeField] public float BurnRate { get; set; }
     [field: SerializeField] public float AdditionalFuelAmount { get; set; }
 
+    Vector2 originalSpritePosition;
     Vector2 targetItemPosition;
     Vector2 itemVelocityRef;
     Vector2 spriteVelocity;
@@ -47,54 +41,55 @@ public class Item : MonoBehaviour, IDraggable, IBurnable {
 
     public static event Action OnItemBurnt = delegate {};
 
-    public static readonly int MainColor_Property = Shader.PropertyToID("_Color");
-    public static readonly int Alpha_Property = Shader.PropertyToID("_Alpha");
-    public static readonly int Altitude_Property = Shader.PropertyToID("_Altitude");
+    public static readonly int MAINCOLOR = Shader.PropertyToID("_Color");
+    public static readonly int ALPHA = Shader.PropertyToID("_Alpha");
+    public static readonly int ALTITUDE = Shader.PropertyToID("_Altitude");
+    public static readonly int SIZE = Shader.PropertyToID("_Size");
 
     void OnEnable() {
+        itemDespawnTimer.Restart();
         itemDespawnTimer.OnTimerStop += DespawnObject;
     }
 
     void OnDisable() {
+        itemDespawnTimer.Stop();
         itemDespawnTimer.OnTimerStop -= DespawnObject;
     }
 
     void Awake() {
-        itemDespawnTimer = new CountdownTimer(ItemDespawnSeconds.Value);
+        itemDespawnTimer = new CountdownTimer(ItemDespawnSeconds.Value, ref InteractionSystem.Instance.InteractableTimersManager);
     }
 
     void Start() {
+        dropShadowSprite.material = new(DraggableSettings.DropShadowMaterial);
+
         BurnHealth = BurnAmount;
         IsBurntOut = false;
         IsBurning = false;
         targetItemPosition = transform.position;
-        originalSortingOrder = itemSprite.sortingOrder;
+        originalSortingOrder = DraggableSettings.defaultSortingOrder;
+        originalSpritePosition = Vector2.zero.Add(y: spriteOffset);
+        itemSprite.transform.localPosition = originalSpritePosition.Add(y: DraggableSettings.pickupOffsetY.Value);
 
-        itemSprite.transform.localPosition = PickupOffset;
-        // itemSprite.transform.DOLocalMoveY(0, FallDuration).SetEase(Ease.OutBounce);
-        itemSprite.transform.DOLocalJump(Vector2.zero, PickupOffset.y, 1, FallDuration);
-        itemSprite.transform.DOPunchScale(Vector2.one * 0.5f, ScaleSpeed, PickupVibrato, PickupElasticity).SetEase(Ease.OutExpo);
-
-        itemDespawnTimer.Restart();
+        itemSprite.transform.DOLocalJump(originalSpritePosition, DraggableSettings.pickupOffsetY.Value, 1, DraggableSettings.fallDuration);
+        itemSprite.transform.DOPunchScale(Vector2.one * 0.5f, DraggableSettings.scaleSpeed, DraggableSettings.pickupVibrato, DraggableSettings.pickupElasticity).SetEase(Ease.OutExpo);
     }
 
     void Update() {
-        transform.position = Vector2.SmoothDamp(transform.position, targetItemPosition, ref itemVelocityRef, Velocity * Time.deltaTime);
+        transform.position = Vector2.SmoothDamp(transform.position, targetItemPosition, ref itemVelocityRef, DraggableSettings.velocity * Time.deltaTime);
         if (IsDragging)
-            itemSprite.transform.localPosition = Vector2.SmoothDamp(itemSprite.transform.localPosition, PickupOffset, ref spriteVelocity, PickupSpeed * Time.deltaTime);
+            itemSprite.transform.localPosition = Vector2.SmoothDamp(itemSprite.transform.localPosition, originalSpritePosition.Add(y: DraggableSettings.pickupOffsetY.Value), ref spriteVelocity, DraggableSettings.pickupSpeed * Time.deltaTime);
 
         DistanceToFloor = (transform.position.y - itemSprite.transform.position.y).AbsoluteValue();
-        dropShadowSprite.material.SetFloat(Altitude_Property, DistanceToFloor);
+        dropShadowSprite.material.SetFloat(ALTITUDE, DistanceToFloor);
 
-        if (!RotateItemOnPickup) return;
+        if (!DraggableSettings.rotateItemOnPickup) return;
 
         Vector2 movement = transform.position.ToVector2() - targetItemPosition;
         MovementDelta = Vector2.Lerp(MovementDelta, movement, 25 * Time.deltaTime);
-        Vector2 movementRotation = (IsDragging ? MovementDelta : movement) * RotationAmount;
-        RotationDelta = Vector3.Lerp(RotationDelta, movementRotation, RotationSpeed * Time.deltaTime);
+        Vector2 movementRotation = (IsDragging ? MovementDelta : movement) * DraggableSettings.rotationAmount;
+        RotationDelta = Vector3.Lerp(RotationDelta, movementRotation, DraggableSettings.rotationSpeed * Time.deltaTime);
         itemSprite.transform.eulerAngles = new Vector3(transform.eulerAngles.x, transform.eulerAngles.y, Mathf.Clamp(RotationDelta.x, -60, 60));
-
-        itemDespawnTimer.Tick(Time.deltaTime);
     }
 
     public void OnPickup(Vector3 pos) {
@@ -102,13 +97,13 @@ public class Item : MonoBehaviour, IDraggable, IBurnable {
         DragCollider.enabled = false;
 
         itemSprite.transform.DOComplete();
-        itemSprite.transform.DOScale(PickupScale, ScaleSpeed).SetEase(Ease.OutExpo);
+        itemSprite.transform.DOScale(DraggableSettings.pickupScale, DraggableSettings.scaleSpeed).SetEase(Ease.OutExpo);
 
         itemSprite.sortingOrder = 500;
 
         AudioManager.Instance?.PlaySFX("GrassStep", true);
 
-        itemDespawnTimer.Reset();
+        itemDespawnTimer.Pause();
     }
 
     public void OnHold(Vector2 offsetPos) {
@@ -122,12 +117,12 @@ public class Item : MonoBehaviour, IDraggable, IBurnable {
         targetItemPosition = pos;
 
         itemSprite.transform.DOComplete();
-        itemSprite.transform.DOLocalMoveY(0, FallDuration).SetEase(Ease.OutBounce);
-        itemSprite.transform.DOScale(new Vector2(1, 1), ScaleSpeed).SetEase(Ease.OutExpo);
+        itemSprite.transform.DOLocalMoveY(originalSpritePosition.y, DraggableSettings.fallDuration).SetEase(Ease.OutBounce);
+        itemSprite.transform.DOScale(new Vector2(1, 1), DraggableSettings.scaleSpeed).SetEase(Ease.OutExpo);
 
         itemSprite.sortingOrder = originalSortingOrder;
 
-        itemDespawnTimer.Start();
+        itemDespawnTimer.Restart();
     }
 
     public float GetFuelAmount() => AdditionalFuelAmount;

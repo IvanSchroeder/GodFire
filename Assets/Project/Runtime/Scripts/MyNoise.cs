@@ -84,7 +84,6 @@ public static class MyNoise {
                     float sampleX = (x - halfWidth - settings.offset.x + sampleCenter.x) / settings.scale * frequency + (octaveOffsets[i].x * frequency);
                     float sampleY = (y - halfHeight - settings.offset.y + sampleCenter.y) / settings.scale * frequency + (octaveOffsets[i].y * frequency);
 
-                    // float perlinValue = Mathf.PerlinNoise(sampleX, sampleY) * 2 - 1;
                     float perlinValue = Mathf.PerlinNoise(sampleX, sampleY);
                     noiseHeight += perlinValue * amplitude;
                     noiseHeight -= superpositionCompensation;
@@ -104,8 +103,10 @@ public static class MyNoise {
                 noiseMap[x,y] = noiseHeight;
 
                 if (settings.normalizeMode == NormalizeMode.Global) {
-                    float normalizedHeight = (noiseMap[x,y] + 1) / (maxPossibleHeight / 0.9f);
-                    noiseMap[x,y] = normalizedHeight.Clamp(0, int.MaxValue);
+                    // float normalizedHeight = (noiseMap[x,y] + 1) / (maxPossibleHeight / 0.9f);
+                    // float normalizedHeight = (noiseMap[x,y] + 1) / (maxPossibleHeight);
+                    float normalizedHeight = noiseMap[x,y];
+                    noiseMap[x,y] = normalizedHeight.Clamp(0, int.MaxValue).RoundTo(3);
                 }
             }
         }
@@ -113,7 +114,7 @@ public static class MyNoise {
         if (settings.normalizeMode == NormalizeMode.Local) {
             for (int y = 0; y < mapHeight; y++) {
                 for (int x = 0; x < mapWidth; x++) {
-                    noiseMap[x,y] = Mathf.InverseLerp(minLocalNoiseHeight, maxLocalNoiseHeight, noiseMap[x,y]);
+                    noiseMap[x,y] = Mathf.InverseLerp(minLocalNoiseHeight, maxLocalNoiseHeight, noiseMap[x,y]).RoundTo(3);
                 }
             }
         }
@@ -130,10 +131,10 @@ public static class MyNoise {
         float steepness;
         float shift;
 
-        if (heightMapSettings.falloffSettings.randomizeFalloff) {
-            Random.InitState(heightMapSettings.noiseSettings.seed);
-            steepness = Random.Range(heightMapSettings.falloffSettings.steepnessRange.x, heightMapSettings.falloffSettings.steepnessRange.y);
-            shift = Random.Range(heightMapSettings.falloffSettings.shiftRange.x, heightMapSettings.falloffSettings.shiftRange.y);
+        if (heightMapSettings.FalloffSettings.randomizeFalloff) {
+            Random.InitState(heightMapSettings.NoiseSettings.seed);
+            steepness = Random.Range(heightMapSettings.FalloffSettings.steepnessRange.x, heightMapSettings.FalloffSettings.steepnessRange.y);
+            shift = Random.Range(heightMapSettings.FalloffSettings.shiftRange.x, heightMapSettings.FalloffSettings.shiftRange.y);
 
             if (shift > 4) {
                 offsetFalloffX = Random.Range(0.90f, 1.10f);
@@ -152,23 +153,58 @@ public static class MyNoise {
             if (shift < 1) shift = 0;
         }
         else {
-            steepness = heightMapSettings.falloffSettings.falloffSteepness;
-            shift = heightMapSettings.falloffSettings.falloffShift;
+            steepness = heightMapSettings.FalloffSettings.falloffSteepness;
+            shift = heightMapSettings.FalloffSettings.falloffShift;
         }
 
-        float d;
+        float dist;
+        float distSqr;
+        float minD;
         float maxD;
         float dx;
         float dy;
-        maxD = Mathf.Sqrt((width.PowerOf(2) * 0.25f) + (height.PowerOf(2) * 0.25f));
+        float innerRadius = heightMapSettings.FalloffSettings.innerFalloffRadius;
+        float outerRadius = heightMapSettings.FalloffSettings.outerFalloffRadius;
+
+        float iRadSqr = (innerRadius * heightMapSettings.FalloffSettings.radiusFactor).PowerOf(2);
+        float oRadSqr = (outerRadius * heightMapSettings.FalloffSettings.radiusFactor).PowerOf(2);
+
+        float value;
+
+        // maxD = Mathf.Sqrt((width.PowerOf(2) * 0.25f) + (height.PowerOf(2) * 0.25f));
+        minD = Mathf.Sqrt((width.PowerOf(2) * innerRadius * heightMapSettings.FalloffSettings.radiusFactor) + (height.PowerOf(2) * innerRadius * heightMapSettings.FalloffSettings.radiusFactor));
+        maxD = Mathf.Sqrt((width.PowerOf(2) * outerRadius * heightMapSettings.FalloffSettings.radiusFactor) + (height.PowerOf(2) * outerRadius * heightMapSettings.FalloffSettings.radiusFactor));
 
         for (int j = 0; j < height; j++) {
             for (int i = 0; i < width; i++) {
-                dx = width / 2 - i - offsetFalloffX;;
+                dx = width / 2 - i - offsetFalloffX;
                 dy = height / 2 - j - offsetFalloffY;
-                d = Mathf.Sqrt(dx.PowerOf(2) + dy.PowerOf(2));
-                float value = (heightMapSettings.falloffSettings.radialFalloffRadius - (2 * d / maxD)) * -1;
-                falloffMap[i,j] = FalloffEvaluation(value, steepness, shift);
+                distSqr = dx.PowerOf(2) + dy.PowerOf(2);
+                dist = Mathf.Sqrt(distSqr);
+
+                value = (-(outerRadius - (2 * dist / maxD))).Clamp01();
+
+                // float innerValue = (-(innerRadius - (2 * dist / minD))).Clamp01();
+                // float outerValue = (-(outerRadius - (2 * dist / maxD))).Clamp01();
+
+                // value = -((outerValue * 2) - innerValue);
+                
+                value = FalloffEvaluation(value, steepness, shift).Clamp01();
+
+                // if (distSqr >= oRadSqr) value = 1f;
+                // if (distSqr <= iRadSqr) value = 0f;
+
+                // if (distSqr <= iRadSqr) value = 0f;
+
+                // float t = Mathf.Lerp(0, 1, dist);
+
+                // if (distSqr >= oRadSqr) value = 1;
+                // else if (distSqr <= iRadSqr) value = 0;
+                // else {
+                //     float t = Mathf.Lerp(innerRadius, outerRadius, dist);
+                //     value = (1 - (2 * dist / maxD)) * -1 * t;
+                //     value = FalloffEvaluation(value, steepness, shift).Clamp01();
+                // }
 
                 // float x = i / (float)width * 2 - offsetFalloffX;
                 // float y = j / (float)height * 2 - offsetFalloffY;
@@ -188,6 +224,8 @@ public static class MyNoise {
                 //         falloffMap[i,j] = SmoothRadialFalloff(value, heightMapSettings.falloffSettings.innerFalloffRadius, heightMapSettings.falloffSettings.outerFalloffRadius, i, j, width / 2, height / 2);
                 //         break;
                 // }
+
+                falloffMap[i,j] = value.RoundTo(3).Clamp01();
             }
         }
 
@@ -269,7 +307,8 @@ public class FalloffSettings {
     [MinMaxSlider(1, 20)] public Vector2 steepnessRange;
     [MinMaxSlider(1, 50)] public Vector2 shiftRange;
     public bool useRadialFalloff = false;
-    [Min(0)] public float outerFalloffRadius;
-    [Min(0)] public float innerFalloffRadius;
-    [Range(0, 1)] public float radialFalloffRadius;
+    [Range(0, 1)] public float outerFalloffRadius = 0;
+    [Range(0, 1)] public float innerFalloffRadius = 1;
+    [Range(0, 1)] public float radiusFactor = 0.25f;
+    // [Range(0, 1)] public float radialFalloffRadius;
 }

@@ -11,6 +11,7 @@ public class InteractionSystem : Singleton<InteractionSystem> {
     Camera mainCamera;
     public LayerMask DraggableLayer;
     public LayerMask CampfireLayer;
+    public LayerMask InteractableLayer;
     public Image GodHandImage;
     public Image CursorImage;
     public Sprite IdleGodHandSprite;
@@ -24,7 +25,7 @@ public class InteractionSystem : Singleton<InteractionSystem> {
 
     public SpriteRenderer mouseGrid;
     public SpriteRenderer selectedCellGrid;
-    [SerializeField] float pickupOffsetY = 0.5f;
+    [SerializeField] FloatSO pickupOffsetY;
     [SerializeField] float dragTime = 5f;
     [SerializeField] float normalTime = 1f;
     [SerializeField, Range(1, 32)] int mouseGridSize = 4;
@@ -46,12 +47,26 @@ public class InteractionSystem : Singleton<InteractionSystem> {
     Vector2 _handVelocity;
     Vector3 _gridVelocity;
 
+    public TimerManager InteractableTimersManager = new();
+
+    void OnDisable() {
+        InteractableTimersManager.DisposeTimers();
+    }
+
+    protected override void Awake() {
+        base.Awake();
+
+        InteractableTimersManager = new();
+    }
+
     void Start() {
         mainCamera = this.GetMainCamera();
         CursorImage.transform.position = Vector2.zero;
     }
 
     void Update() {
+        InteractableTimersManager.UpdateTimers(Time.deltaTime);
+
         _mouseScreenPosition = Input.mousePosition;
         _mouseWorldPosition = mainCamera.ScreenToWorld(_mouseScreenPosition).With(z: 0);
         _mouseCellPosition = WorldGenerator.Instance.GroundTilemap.WorldToCell(_mouseWorldPosition);
@@ -65,35 +80,36 @@ public class InteractionSystem : Singleton<InteractionSystem> {
             HandleSelectionGrid();
         }
 
-        selectedCellGrid.transform.position = _selectedCellPosition;
-
         if (Input.GetMouseButtonDown(0)) {
             SwapGodHand(DragGodHandSprite);
-            RaycastHit2D hit = Physics2D.Raycast(_mouseWorldPosition, Vector2.zero, default, DraggableLayer);
+            RaycastHit2D interactableHit = Physics2D.Raycast(_mouseWorldPosition, Vector2.zero, default, InteractableLayer);
 
-            if (hit) {
-                draggedObject = (Item)hit.transform.GetComponentInHierarchy<IDraggable>();
+            if (interactableHit && interactableHit.transform.TryGetComponent<IInteractable>(out var interactable)) {
+                interactable.OnInteract();
+            }
+        }
+        else if (Input.GetMouseButtonUp(0)) {
+            SwapGodHand(IdleGodHandSprite);
+        }
+
+        if (Input.GetMouseButtonDown(1)) {
+            SwapGodHand(DragGodHandSprite);
+            RaycastHit2D draggableHit = Physics2D.Raycast(_mouseWorldPosition, Vector2.zero, default, DraggableLayer);
+
+            if (draggableHit) {
+                draggedObject = (Item)draggableHit.transform.GetComponentInHierarchy<IDraggable>();
                 _offset = draggedObject.transform.position - _mouseWorldPosition;
                 draggedObject.OnPickup(_mouseWorldPosition + _offset.ToVector3());
             }
-            else {
-                RaycastHit2D campfireHit = Physics2D.Raycast(_mouseWorldPosition, Vector2.zero, default, CampfireLayer);
-
-                if (campfireHit) {
-                    Campfire campf = campfireHit.transform.GetComponentInHierarchy<Campfire>();
-                    campf.CheckCampfireStatus();
-                }
-            }
-
         }
-        else if (Input.GetMouseButtonUp(0)) {
+        else if (Input.GetMouseButtonUp(1)) {
             SwapGodHand(IdleGodHandSprite);
             draggedObject?.OnDrop(_mouseWorldPosition + _offset.ToVector3());
             draggedObject = null;
         }
 
         if (draggedObject != null) {
-            _targetHandPosition = _mouseWorldPosition + (Vector3.up * pickupOffsetY);
+            _targetHandPosition = _mouseWorldPosition + (Vector3.up * pickupOffsetY.Value);
             _currentHandPosition = Vector2.SmoothDamp(_currentHandPosition, _targetHandPosition, ref _handVelocity, dragTime * Time.deltaTime);
             draggedObject?.OnHold(_mouseWorldPosition + _offset.ToVector3());
         }
@@ -113,28 +129,30 @@ public class InteractionSystem : Singleton<InteractionSystem> {
     }
 
     void HandleMouseGrid() {
-        Vector3 targetPosition = snapGrid ? _mouseGridPosition : _mouseWorldPosition;
-        mouseGrid.transform.localScale = new Vector3(mouseGridSize, mouseGridSize / 2, 1);
-        mouseGrid.transform.position = Vector3.SmoothDamp(mouseGrid.transform.position, targetPosition, ref _gridVelocity, gridSmoothness * Time.deltaTime);
+        // Vector3 targetPosition = snapGrid ? _mouseGridPosition : _mouseWorldPosition;
+        // mouseGrid.transform.localScale = new Vector3(mouseGridSize, mouseGridSize / 2, 1);
+        // mouseGrid.transform.position = Vector3.SmoothDamp(mouseGrid.transform.position, targetPosition, ref _gridVelocity, gridSmoothness * Time.deltaTime);
     }
 
     void HandleSelectionGrid() {
-        if (_selectedCellPosition != _previousSelectedCellPosition) {
-            selectedCellGrid.enabled = true;
-            _previousSelectedCellPosition = _selectedCellPosition;
-        }
-        else {
-            ToggleSelectionGrid();
-        }
+        // if (_selectedCellPosition != _previousSelectedCellPosition) {
+        //     selectedCellGrid.enabled = true;
+        //     _previousSelectedCellPosition = _selectedCellPosition;
+        // }
+        // else {
+        //     ToggleSelectionGrid();
+        // }
 
-        Vector3Int chunkPos = WorldDataHelper.ChunkPositionFromTileCoords(WorldGenerator.Instance.chunkSize, _mouseCellPosition);
-        Chunk chunk = WorldGenerator.Instance.WorldData.ChunkData
-            .GetChunkAt(WorldDataHelper.ChunkIDFromChunkPosition(WorldGenerator.Instance.chunkSize, chunkPos));
+        // selectedCellGrid.transform.position = _selectedCellPosition;
 
-        if (chunk.IsNotNull())
-            SelectedTileHeightValueText.text = $"Selected Tile Height: {chunk.GetLocalNoiseValueAt(_mouseCellPosition - chunk.WorldPosition):f3}";
-        else if (!selectedCellGrid.enabled)
-            SelectedTileHeightValueText.text = $"Selected Tile Height: -,-";
+        // Vector3Int chunkPos = WorldDataHelper.ChunkPositionFromTileCoords(WorldGenerator.Instance.chunkSize, _mouseCellPosition);
+        // Chunk chunk = WorldGenerator.Instance.WorldData.ChunkData
+        //     .GetChunkAt(WorldDataHelper.ChunkIDFromChunkPosition(WorldGenerator.Instance.chunkSize, chunkPos));
+
+        // if (chunk.IsNotNull())
+        //     SelectedTileHeightValueText.text = $"Selected Tile Height: {chunk.GetLocalNoiseValueAt(_mouseCellPosition - chunk.WorldPosition):f3}";
+        // else if (!selectedCellGrid.enabled)
+        //     SelectedTileHeightValueText.text = $"Selected Tile Height: -,-";
     }
 
     void ToggleMouseGrid() {

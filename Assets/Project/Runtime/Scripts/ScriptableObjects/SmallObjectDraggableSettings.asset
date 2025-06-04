@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ccafd800c6c1b5a41b6ea4aafd14ae61, type: 3}
+  m_Name: SmallObjectDraggableSettings
+  m_EditorClassIdentifier: 
+  DropShadowMaterial: {fileID: 2100000, guid: 89be78b02d5ede944b8933e557e33e63, type: 2}
+  pickupOffsetY: {fileID: 11400000, guid: 27d075842cfc32047ba689ad0bb427b1, type: 2}
+  velocity: 15
+  pickupSpeed: 15
+  fallDuration: 0.5
+  pickupScale: {x: 1.2, y: 1.2}
+  scaleSpeed: 0.3
+  pickupVibrato: 1
+  pickupElasticity: 5
+  rotateItemOnPickup: 1
+  rotationAmount: 15
+  rotationSpeed: 50
+  defaultSortingOrder: 0

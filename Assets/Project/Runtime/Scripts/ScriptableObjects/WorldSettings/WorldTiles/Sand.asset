@@ -12,7 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b05dd32bda784ff47aabafd1cb363967, type: 3}
   m_Name: Sand
   m_EditorClassIdentifier: 
+  tileName: Sand
+  id: 2
   tile: {fileID: 11400000, guid: daea14df1cd5b26458eb8f7dc3e52a2e, type: 2}
-  id: Sand
   type: 2
   targetTilemap: 2
+  color: {r: 1, g: 0.75294125, b: 0.3803922, a: 1}

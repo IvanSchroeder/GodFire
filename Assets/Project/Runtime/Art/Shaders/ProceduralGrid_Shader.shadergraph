@@ -6198,7 +6198,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "09602d98d32d4137bb1c87d30068b2a3",
     "m_Id": 0,
-    "m_DisplayName": "CellAlpha",
+    "m_DisplayName": "CellsAlpha",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -6663,7 +6663,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "0e5577b4774e41fd97d4592a1708681d",
     "m_Id": 0,
-    "m_DisplayName": "GridSizeY",
+    "m_DisplayName": "GridHeight",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -6810,7 +6810,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector2MaterialSlot",
     "m_ObjectId": "103c8065580b4243bc26afb8483b0fe1",
     "m_Id": 0,
-    "m_DisplayName": "Offset",
+    "m_DisplayName": "TilingOffset",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -7568,7 +7568,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "1c8668b6d9b248d6aa35292898db140e",
     "m_Id": 0,
-    "m_DisplayName": "GridSizeX",
+    "m_DisplayName": "GridWidth",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -10558,10 +10558,10 @@
     "m_Guid": {
         "m_GuidSerialized": "ae5977be-a68e-4c5d-8b8e-a5779110a4b3"
     },
-    "m_Name": "LineColor",
+    "m_Name": "LinesColor",
     "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "LineColor",
-    "m_DefaultReferenceName": "_LineColor",
+    "m_RefNameGeneratedByDisplayName": "LinesColor",
+    "m_DefaultReferenceName": "_LinesColor",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": true,
     "m_UseCustomSlotLabel": false,
@@ -11009,7 +11009,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector2MaterialSlot",
     "m_ObjectId": "3be8c9f9ee4745cbb8fb16d7422c31ea",
     "m_Id": 0,
-    "m_DisplayName": "Offset",
+    "m_DisplayName": "TilingOffset",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -12928,7 +12928,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "4bec8c08fed943bd8b571ec142dbcd84",
     "m_Id": 0,
-    "m_DisplayName": "LineAlpha",
+    "m_DisplayName": "LinesAlpha",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -13494,7 +13494,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "4f3f9392d4124c4fbca555e0a81830f5",
     "m_Id": 0,
-    "m_DisplayName": "GridSizeY",
+    "m_DisplayName": "GridHeight",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -13672,7 +13672,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector2MaterialSlot",
     "m_ObjectId": "50e69c10065c48f880939f2eadc05e6d",
     "m_Id": 0,
-    "m_DisplayName": "MoveOffset",
+    "m_DisplayName": "PositionOffset",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -14162,10 +14162,10 @@
     "m_Guid": {
         "m_GuidSerialized": "86626ab8-013e-4f5b-93e8-250430ab5f3b"
     },
-    "m_Name": "GridSizeY",
+    "m_Name": "GridHeight",
     "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "GridSizeY",
-    "m_DefaultReferenceName": "_GridSizeY",
+    "m_RefNameGeneratedByDisplayName": "GridHeight",
+    "m_DefaultReferenceName": "_GridHeight",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": true,
     "m_UseCustomSlotLabel": false,
@@ -14277,7 +14277,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "5646e937fc994402b4fca897228b16a7",
     "m_Id": 0,
-    "m_DisplayName": "GridSizeY",
+    "m_DisplayName": "GridHeight",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -17509,7 +17509,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector2MaterialSlot",
     "m_ObjectId": "74c3d2f0f17f417a9b58d24e75db401e",
     "m_Id": 0,
-    "m_DisplayName": "MoveOffset",
+    "m_DisplayName": "PositionOffset",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -19454,10 +19454,10 @@
     "m_Guid": {
         "m_GuidSerialized": "1dde24e3-8cda-45ee-90be-117c3bb12bae"
     },
-    "m_Name": "LineThickness",
+    "m_Name": "LinesThickness",
     "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "LineThickness",
-    "m_DefaultReferenceName": "_LineThickness",
+    "m_RefNameGeneratedByDisplayName": "LinesThickness",
+    "m_DefaultReferenceName": "_LinesThickness",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": true,
     "m_UseCustomSlotLabel": false,
@@ -21007,7 +21007,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector4MaterialSlot",
     "m_ObjectId": "8da0b9317ad144449a91eff3ee34ed16",
     "m_Id": 0,
-    "m_DisplayName": "CellColor",
+    "m_DisplayName": "CellsColor",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -21508,7 +21508,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "938b921a4114468fb8d9b2fa2254917f",
     "m_Id": 0,
-    "m_DisplayName": "CellThickness",
+    "m_DisplayName": "CellsThickness",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -21575,10 +21575,10 @@
     "m_Guid": {
         "m_GuidSerialized": "86739b19-30bf-4c69-95b1-c7c2bc374f55"
     },
-    "m_Name": "LineAlpha",
+    "m_Name": "LinesAlpha",
     "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "LineAlpha",
-    "m_DefaultReferenceName": "_LineAlpha",
+    "m_RefNameGeneratedByDisplayName": "LinesAlpha",
+    "m_DefaultReferenceName": "_LinesAlpha",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": true,
     "m_UseCustomSlotLabel": false,
@@ -22692,7 +22692,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "9ed2cb78061240e991045c250e8eee9d",
     "m_Id": 0,
-    "m_DisplayName": "GridSizeX",
+    "m_DisplayName": "GridWidth",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -23845,7 +23845,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "a7a5421071034619b7171fc6932cc073",
     "m_Id": 0,
-    "m_DisplayName": "GridSizeX",
+    "m_DisplayName": "GridWidth",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -24460,6 +24460,21 @@
             "m_Id": "8a24b1d0cd9c4513bf8b142290dca21e"
         },
         {
+            "m_Id": "b861bd2fc97f4915b9a4f40809a3d393"
+        },
+        {
+            "m_Id": "ccac5849c99d42e78f86ba37500f0dcd"
+        },
+        {
+            "m_Id": "b6fe96034a0a401687b0c3ff5e67e40e"
+        },
+        {
+            "m_Id": "6018162af56b4f44affa843126294b72"
+        },
+        {
+            "m_Id": "f3eb7e3de1e24fb1bc7705fa7a269fb6"
+        },
+        {
             "m_Id": "2df74a07364e44b7b2d62927769d4b2f"
         },
         {
@@ -24476,21 +24491,6 @@
         },
         {
             "m_Id": "0aaefa9fe5654527826b38f58e1f3a40"
-        },
-        {
-            "m_Id": "b861bd2fc97f4915b9a4f40809a3d393"
-        },
-        {
-            "m_Id": "ccac5849c99d42e78f86ba37500f0dcd"
-        },
-        {
-            "m_Id": "b6fe96034a0a401687b0c3ff5e67e40e"
-        },
-        {
-            "m_Id": "6018162af56b4f44affa843126294b72"
-        },
-        {
-            "m_Id": "f3eb7e3de1e24fb1bc7705fa7a269fb6"
         }
     ]
 }
@@ -24648,7 +24648,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "ad5805bb5d9c4c21b81670e20a04974b",
     "m_Id": 0,
-    "m_DisplayName": "LineThickness",
+    "m_DisplayName": "LinesThickness",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -24693,7 +24693,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "ad9467aa478648c19ce21837b369eb94",
     "m_Id": 0,
-    "m_DisplayName": "GridSizeY",
+    "m_DisplayName": "GridHeight",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -26245,7 +26245,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "ba331ce6166a4802b64601967ee993f3",
     "m_Id": 0,
-    "m_DisplayName": "GridSizeX",
+    "m_DisplayName": "GridWidth",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -27747,7 +27747,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector4MaterialSlot",
     "m_ObjectId": "cfcc2195214147f49ec604f230eb7b7e",
     "m_Id": 0,
-    "m_DisplayName": "LineColor",
+    "m_DisplayName": "LinesColor",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -28665,10 +28665,10 @@
     "m_Guid": {
         "m_GuidSerialized": "4cc1f18d-e6dc-483c-8da4-9d98319ca7db"
     },
-    "m_Name": "CellColor",
+    "m_Name": "CellsColor",
     "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "CellColor",
-    "m_DefaultReferenceName": "_CellColor",
+    "m_RefNameGeneratedByDisplayName": "CellsColor",
+    "m_DefaultReferenceName": "_CellsColor",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": true,
     "m_UseCustomSlotLabel": false,
@@ -29144,7 +29144,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "de28c7368419401295448113303aa4b4",
     "m_Id": 0,
-    "m_DisplayName": "LineThickness",
+    "m_DisplayName": "LinesThickness",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -29736,10 +29736,10 @@
     "m_Guid": {
         "m_GuidSerialized": "d2a384d2-caf9-4f44-89bb-8a704e6c3cd4"
     },
-    "m_Name": "GridSizeX",
+    "m_Name": "GridWidth",
     "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "GridSizeX",
-    "m_DefaultReferenceName": "_GridSizeX",
+    "m_RefNameGeneratedByDisplayName": "GridWidth",
+    "m_DefaultReferenceName": "_GridWidth",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": true,
     "m_UseCustomSlotLabel": false,
@@ -30072,10 +30072,10 @@
     "m_Guid": {
         "m_GuidSerialized": "11e59e5e-96c4-4549-b3e5-17252d024b23"
     },
-    "m_Name": "MoveOffset",
+    "m_Name": "PositionOffset",
     "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "MoveOffset",
-    "m_DefaultReferenceName": "_MoveOffset",
+    "m_RefNameGeneratedByDisplayName": "PositionOffset",
+    "m_DefaultReferenceName": "_PositionOffset",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": true,
     "m_UseCustomSlotLabel": false,
@@ -30162,10 +30162,10 @@
     "m_Guid": {
         "m_GuidSerialized": "e3b06c8f-2e30-43c3-b558-404ea04026c2"
     },
-    "m_Name": "CellThickness",
+    "m_Name": "CellsThickness",
     "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "CellThickness",
-    "m_DefaultReferenceName": "_CellThickness",
+    "m_RefNameGeneratedByDisplayName": "CellsThickness",
+    "m_DefaultReferenceName": "_CellsThickness",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": true,
     "m_UseCustomSlotLabel": false,
@@ -30591,7 +30591,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "ed1d87b62c8a4d8ab7662ebdb2967284",
     "m_Id": 0,
-    "m_DisplayName": "LineThickness",
+    "m_DisplayName": "LinesThickness",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -30620,7 +30620,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "ed7f5da7a6314aea84e2a3fc5e45da3c",
     "m_Id": 0,
-    "m_DisplayName": "LineThickness",
+    "m_DisplayName": "LinesThickness",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -31039,10 +31039,10 @@
     "m_Guid": {
         "m_GuidSerialized": "34b79599-4429-4610-bde5-6735d0ffe0ab"
     },
-    "m_Name": "CellAlpha",
+    "m_Name": "CellsAlpha",
     "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "CellAlpha",
-    "m_DefaultReferenceName": "_CellAlpha",
+    "m_RefNameGeneratedByDisplayName": "CellsAlpha",
+    "m_DefaultReferenceName": "_CellsAlpha",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": true,
     "m_UseCustomSlotLabel": false,
@@ -32275,10 +32275,10 @@
     "m_Guid": {
         "m_GuidSerialized": "d4b895a0-a13f-4782-b602-f89e75a898dc"
     },
-    "m_Name": "Offset",
+    "m_Name": "TilingOffset",
     "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "Offset",
-    "m_DefaultReferenceName": "_Offset",
+    "m_RefNameGeneratedByDisplayName": "TilingOffset",
+    "m_DefaultReferenceName": "_TilingOffset",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": true,
     "m_UseCustomSlotLabel": false,

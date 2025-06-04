@@ -13,6 +13,7 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 using System.Threading;
+using System.Security.Cryptography;
 
 namespace UnityUtilities {
 	/// <summary>
@@ -1799,7 +1800,7 @@ namespace UnityUtilities {
 			/// <returns></returns>
 			/// <remarks></remarks>
 			public static float Shear(float value) {
-			    return value % 1.0f;
+			    return value % 1;
 			}
 
 			/// <summary>
@@ -1814,6 +1815,34 @@ namespace UnityUtilities {
 			/// </summary>
 			public static char ToChar(this int value) {
 				return Convert.ToChar(value);
+			}
+
+			/// <summary>
+			/// Converts a long to a double
+			/// </summary>
+			public static double ToDouble(this long l) {
+				return Convert.ToDouble(l);
+			}
+
+			/// <summary>
+			/// Converts a long to a ulong
+			/// </summary>
+			public static ulong ToULong(this long l) {
+				return Convert.ToUInt64(l);
+			}
+
+			/// <summary>
+			/// Converts a double to a long
+			/// </summary>
+			public static long ToLong(this double d) {
+				return Convert.ToInt64(d);
+			}
+
+			/// <summary>
+			/// Converts a double to a long
+			/// </summary>
+			public static ulong ToULong(this double d) {
+				return Convert.ToUInt64(d);
 			}
 
 			/// <summary>
@@ -1983,6 +2012,15 @@ namespace UnityUtilities {
 			/// <remarks></remarks>
 			public static float DegreesToRadians(this float angle) {
 			    return angle * DEG_TO_RAD;
+			}
+
+			public static ulong ToUlongMD5(this string input) {
+				using (MD5 md5 = MD5.Create()) {
+					byte[] inputBytes = Encoding.UTF8.GetBytes(input);
+					byte[] hashBytes = md5.ComputeHash(inputBytes);
+
+					return BitConverter.ToUInt64(hashBytes, 0);
+				}
 			}
 		#endregion
 		

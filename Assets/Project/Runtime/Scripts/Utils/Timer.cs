@@ -13,17 +13,22 @@ namespace UnityUtilities {
         
         public Action OnTimerStart = delegate { };
         public Action OnTimerStop = delegate { };
+        public Action OnTimerResume = delegate { };
+        public Action OnTimerPause = delegate { };
 
-        protected Timer(float value) {
+        public TimerManager ControllingTimerManager;
+
+        protected Timer(float value, ref TimerManager timerManager) {
             initialTime = value;
             IsRunning = false;
+            ControllingTimerManager = timerManager;
         }
 
         public void Start() {
             CurrentTime = initialTime;
             if (!IsRunning) {
                 IsRunning = true;
-                // TimerManager.RegisterTimer(this);
+                ControllingTimerManager?.RegisterTimer(this);
                 OnTimerStart.Invoke();
             }
         }
@@ -31,7 +36,7 @@ namespace UnityUtilities {
         public void Stop() {
             if (IsRunning) {
                 IsRunning = false;
-                // TimerManager.DeregisterTimer(this);
+                ControllingTimerManager?.DeregisterTimer(this);
                 OnTimerStop.Invoke();
             }
         }
@@ -42,8 +47,15 @@ namespace UnityUtilities {
 
         public float GetTime() => CurrentTime;
         
-        public void Resume() => IsRunning = true;
-        public void Pause() => IsRunning = false;
+        public void Resume() {
+            IsRunning = true;
+            OnTimerResume?.Invoke();
+        }
+
+        public void Pause() {
+            IsRunning = false;
+            OnTimerPause?.Invoke();
+        }
 
         public virtual void Reset() {
             Pause();
@@ -53,6 +65,7 @@ namespace UnityUtilities {
             initialTime = newTime;
             Reset();
         }
+        
         public virtual void Restart() {
             Reset();
             Start();
@@ -81,7 +94,7 @@ namespace UnityUtilities {
             if (disposed) return;
 
             if (disposing) {
-                // TimerManager.DeregisterTimer(this);
+                ControllingTimerManager?.DeregisterTimer(this);
             }
 
             disposed = true;
@@ -94,7 +107,7 @@ namespace UnityUtilities {
     public class CountdownTimer : Timer {
         public override bool IsFinished => CurrentTime <= 0;
 
-        public CountdownTimer(float value) : base(value) { }
+        public CountdownTimer(float value, ref TimerManager timerManager) : base(value, ref timerManager) { }
 
         public override void Tick(float deltaTime) {
             if (IsRunning && CurrentTime > 0) {
@@ -113,7 +126,7 @@ namespace UnityUtilities {
     /// Timer that counts up from zero to infinity.  Great for measuring durations.
     /// </summary>
     public class StopwatchTimer : Timer {
-        public StopwatchTimer() : base(0) { }
+        public StopwatchTimer(ref TimerManager timerManager) : base(0, ref timerManager) { }
 
         public override void Tick(float deltaTime) {
             if (IsRunning) {
@@ -138,14 +151,13 @@ namespace UnityUtilities {
         
         float timeThreshold;
 
-        public FrequencyTimer(int ticksPerSecond) : base(0) {
+        public FrequencyTimer(int ticksPerSecond, ref TimerManager timerManager) : base(0, ref timerManager) {
             CalculateTimeThreshold(ticksPerSecond);
         }
 
         public override void Tick(float deltaTime) {
             if (IsRunning && CurrentTime >= timeThreshold) {
                 RemoveTime(timeThreshold);
-                CurrentTime -= timeThreshold;
                 OnTick.Invoke();
             }
 

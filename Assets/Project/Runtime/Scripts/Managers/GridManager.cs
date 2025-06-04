@@ -8,7 +8,7 @@ public class GridManager : Singleton<GridManager> {
     InputManager inputManager => InputManager.Instance;
 
     GridData gridData;
-    [SerializeField] WorldObjectsDatabaseSO worldObjectsDatabase;
+    [SerializeField] ObjectsDatabaseSO worldObjectsDatabase;
     public float yPlacementOffset = 0.25f;
     Vector3Int lastDetectedPosition = Vector3Int.zero;
 
@@ -34,7 +34,7 @@ public class GridManager : Singleton<GridManager> {
     public void StartPlacement(int ID) {
         StopPlacement();
 
-        buildingState = new PlacementState(ID, grid, worldObjectsDatabase, gridData, ObjectPlacer.Instance);
+        buildingState = new PlacementState(ID, grid, worldObjectsDatabase, gridData);
 
         InputManager.OnClicked += BuildWorldObject;
         InputManager.OnExit += StopPlacement;
@@ -43,7 +43,7 @@ public class GridManager : Singleton<GridManager> {
     public void StartRemoving() {
         StopPlacement();
         
-        buildingState = new RemovingState(grid, gridData, ObjectPlacer.Instance);
+        buildingState = new RemovingState(grid, gridData);
         InputManager.OnClicked += BuildWorldObject;
         InputManager.OnExit += StopPlacement;
     }

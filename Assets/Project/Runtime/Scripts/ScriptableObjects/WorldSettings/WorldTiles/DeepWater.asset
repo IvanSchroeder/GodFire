@@ -12,7 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b05dd32bda784ff47aabafd1cb363967, type: 3}
   m_Name: DeepWater
   m_EditorClassIdentifier: 
+  tileName: Deep Water
+  id: 0
   tile: {fileID: 11400000, guid: ce32d821e7854744e8e282c34dec0364, type: 2}
-  id: DeepWater
   type: 0
   targetTilemap: 0
+  color: {r: 0.427451, g: 0.6392157, b: 0.85098046, a: 1}

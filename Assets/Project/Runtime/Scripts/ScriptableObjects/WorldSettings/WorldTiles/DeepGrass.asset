@@ -12,7 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b05dd32bda784ff47aabafd1cb363967, type: 3}
   m_Name: DeepGrass
   m_EditorClassIdentifier: 
+  tileName: Deep Grass
+  id: 4
   tile: {fileID: 11400000, guid: e23f6bf189761fa44bf7f856f946aa64, type: 2}
-  id: DeepGrass
   type: 5
   targetTilemap: 2
+  color: {r: 0.40000004, g: 0.62352943, b: 0.0627451, a: 1}

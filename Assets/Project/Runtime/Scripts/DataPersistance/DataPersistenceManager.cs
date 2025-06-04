@@ -4,8 +4,9 @@ using System.IO;
 using UnityUtilities;
 using System.Linq;
 using System;
-using System.Collections;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 
 namespace SaveSystem {
     public class DataPersistenceManager : Singleton<DataPersistenceManager> {
@@ -54,7 +55,9 @@ namespace SaveSystem {
         public void CreateDirectory(string path) {
             if (!Directory.Exists(path)) {
                 Directory.CreateDirectory(path);
+                #if UNITY_EDITOR
                 AssetDatabase.Refresh();
+                #endif
             }
         }
 
@@ -79,13 +82,16 @@ namespace SaveSystem {
                     Directory.Delete(Path.GetDirectoryName(path), true);
                 }
                 else {
-                    Debug.LogWarning($"Tried to delete profile data, but data was not found at path: {path}");                }
+                    Debug.LogWarning($"Tried to delete profile data, but data was not found at path: {path}");                
+                }
             }
             catch (Exception e) {
                 Debug.LogWarning($"Failed to delete profile data for prifleId: {selectedProfileId} at path: {path} \n{e}");  
             }
 
+            #if UNITY_EDITOR
             AssetDatabase.Refresh();
+            #endif
         }
 
         public void CreateGameData() {

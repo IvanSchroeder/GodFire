@@ -6,9 +6,9 @@ using System.Linq;
 
 namespace UnityUtilities {
     /// <summary>
-	/// Lists Extensions.
+	/// Collection Extensions.
 	/// </summary>
-    public static class ListExtensions {
+    public static class CollectionExtensions {
         static Random rng;
         
         /// <summary>
@@ -46,13 +46,6 @@ namespace UnityUtilities {
         public static void Swap<T>(this IList<T> list, int indexA, int indexB) {
             (list[indexA], list[indexB]) = (list[indexB], list[indexA]);
         }
-
-        // public static IList<T> Swap<T>(this IList<T> list, int a, int b) {
-		// 	T temp = list[a];
-		// 	list[a] = list[b];
-		// 	list[b] = temp;
-		// 	return list;
-		// }
 
         /// <summary>
         /// Shuffles the elements in the list using the Durstenfeld implementation of the Fisher-Yates algorithm.
@@ -291,6 +284,28 @@ namespace UnityUtilities {
 		/// <param name="data"></param>
 		/// <returns></returns>
 		public static bool IsNullOrEmpty<T1, T2>(this Dictionary<T1,T2> data) {
+			return ((data == null) || (data.Count == 0));
+		}
+
+		/// <summary>
+		/// Returns true if the enumerable is null or empty
+		/// </summary>
+		/// <typeparam name="T1"></typeparam>
+		/// <typeparam name="T2"></typeparam>
+		/// <param name="data"></param>
+		/// <returns></returns>
+		public static bool IsNullOrEmpty<T>(this IEnumerable<T> data) {
+			return ((data == null) || (data.Count<T>() == 0));
+		}
+
+		/// <summary>
+		/// Returns true if the queue is null or empty
+		/// </summary>
+		/// <typeparam name="T1"></typeparam>
+		/// <typeparam name="T2"></typeparam>
+		/// <param name="data"></param>
+		/// <returns></returns>
+		public static bool IsNullOrEmpty<T>(this Queue<T> data) {
 			return ((data == null) || (data.Count == 0));
 		}
 

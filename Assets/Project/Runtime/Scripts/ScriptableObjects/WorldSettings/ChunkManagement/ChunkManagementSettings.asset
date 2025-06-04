@@ -12,14 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbe2de88eeac0504a85427c29b57c4ae, type: 3}
   m_Name: ChunkManagementSettings
   m_EditorClassIdentifier: 
-  worldWidthInChunks: 7
-  worldHeightInChunks: 7
+  worldWidthInChunks: 11
+  worldHeightInChunks: 11
   chunkSize: 16
   chunkRenderDistance: 3
   chunkUnloadingDistance: 4
   chunkActiveThreshold: 1
   chunksMovedThreshold: 1
-  chunksLoadedPerFrame: 10
-  loadInterval: 2
+  chunksLoadedPerFrame: 20
+  loadInterval: 1
   chunksUnloadedPerFrame: 50
   unloadInterval: 1

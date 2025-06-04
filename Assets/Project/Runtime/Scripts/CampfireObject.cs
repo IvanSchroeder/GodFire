@@ -4,19 +4,11 @@ using UnityEngine;
 using WorldSimulation;
 using UnityEngine.UI;
 using UnityEngine.Rendering.Universal;
-using System;
 
-public interface IGridObject {
-    Vector2Int Size { get; set; }
-    Vector3Int GridPosition { get; set; }
-    Vector3 WorldPosition { get; set; }
-}
-
-public class Campfire : MonoBehaviour, IGridObject {
+public class CampfireObject : WorldObject, IInteractable {
     [Header("References")]
     [Space(5f)]
     [SerializeField] Animator Anim;
-    [SerializeField] SpriteRenderer Sprite;
     [SerializeField] AudioSource AmbienceSource;
     [SerializeField] AudioSource SFXSource;
     [SerializeField] ParticleSystem FireEffect;
@@ -31,6 +23,12 @@ public class Campfire : MonoBehaviour, IGridObject {
     [SerializeField] Slider fuelSlider;
     [SerializeField] Image fuelFillImage;
 
+    [field: SerializeField] public Collider2D InteractionCollider { get; set; }
+    [field: SerializeField] public bool IsInteractable { get; set; } = true;
+    [field: SerializeField] public bool HasInteractabilityCooldown { get; set; } = false;
+    [field: SerializeField] public CountdownTimer InteractabilityTimer { get; set; }
+    [field: SerializeField] public float InteractabilityCooldownSeconds { get; set; }
+
     [Space(10f)]
     [Header("Parameters")]
     [Space(5f)]
@@ -38,9 +36,7 @@ public class Campfire : MonoBehaviour, IGridObject {
     [SerializeField] bool startsLit;
     [SerializeField] bool startsBurnt;
     [SerializeField] bool consumeFuel = true;
-    [SerializeField] float currentHealth;
     [SerializeField] float maxHealth;
-    [SerializeField] float currentFuelAmount;
     [SerializeField] float maxFuelAmount;
     [SerializeField] float baseFuelConsumptionRate;
     [SerializeField] int baseFireAmount;
@@ -51,6 +47,8 @@ public class Campfire : MonoBehaviour, IGridObject {
     [SerializeField] Gradient fuelLitColorGradient;
     [SerializeField] Gradient fuelUnlitColorGradient;
 
+    [SerializeField] float currentHealth;
+    [SerializeField] float currentFuelAmount;
     [SerializeField] bool isLit;
     [SerializeField] bool isBurnt;
     [SerializeField] bool isOutOfFuel;
@@ -62,13 +60,15 @@ public class Campfire : MonoBehaviour, IGridObject {
     public readonly int UnlitHash = Animator.StringToHash("Unlit");
     public readonly int BurntHash = Animator.StringToHash("Burnt");
 
-    [Header("Grid Parameters")]
 
-    [property: SerializeField] public Vector2Int Size { get => Size; set => Size = value; }
-    [property: SerializeField] public Vector3Int GridPosition { get => GridPosition; set => GridPosition = value; }
-    [property: SerializeField] public Vector3 WorldPosition { get => WorldPosition; set => WorldPosition = value; }
+    void OnValidate() {
+        if (worldObjectData.IsNull()) SetObjectData(new CampfireData());
+        worldObjectData.Name = "Campfire";
+    }
 
-    void Awake() {
+    public override void Awake() {
+        SetObjectData(new CampfireData());
+        worldObjectData.Name = "Campfire";
         fireEmission = FireEffect.emission;
     }
 
@@ -76,7 +76,9 @@ public class Campfire : MonoBehaviour, IGridObject {
         worldCanvas.worldCamera = this.GetMainCamera();
 
         BurningItemsList = new List<Item>();
+    }
 
+    public override void Init() {
         if (startsLit) {
             SetHealth(maxHealth);
             SetFuel(maxFuelAmount);
@@ -149,6 +151,12 @@ public class Campfire : MonoBehaviour, IGridObject {
             BurningItemsList.Remove(burnable);
             burnable.EndBurn();
         }
+    }
+
+    public void OnInteract() {
+        if (!IsInteractable) return;
+
+        CheckCampfireStatus();
     }
 
     void ConsumeFuel() {

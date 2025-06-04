@@ -5,6 +5,8 @@ public class GameManager : Singleton<GameManager> {
     public AudioManager AudioManager { get; private set; }
     public OptionsManager OptionsManager { get; private set; }
 
+    public System.Random SystemRandom = new();
+
     protected override void Awake() {
         base.Awake();
 

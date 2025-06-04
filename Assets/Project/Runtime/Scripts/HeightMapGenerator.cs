@@ -4,7 +4,7 @@ using UnityUtilities;
 
 public static class HeightMapGenerator {
     public static HeightMap GenerateHeightMap(int width, int height, HeightMapSettings heightMapSettings, Vector2 sampleCenter) {
-        float[,] valuesMap = MyNoise.GenerateNoiseMap(width, height, heightMapSettings.noiseSettings, sampleCenter);
+        float[,] valuesMap = MyNoise.GenerateNoiseMap(width, height, heightMapSettings.NoiseSettings, sampleCenter);
         float[,] falloffMap = MyNoise.GenerateFalloffMap(width, height, heightMapSettings);
 
         if (valuesMap.IsNull()) valuesMap = GenerateEmptyMap(width, height);
@@ -12,12 +12,12 @@ public static class HeightMapGenerator {
 
         float minValue = float.MaxValue;
         float maxValue = float.MinValue;
-        AnimationCurve heightCurve_threadSafe = new AnimationCurve(heightMapSettings.noiseSettings.heightCurve.keys);
+        AnimationCurve heightCurve_threadSafe = new AnimationCurve(heightMapSettings.NoiseSettings.heightCurve.keys);
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                valuesMap[x,y] = ((valuesMap[x,y] - (heightMapSettings.falloffSettings.useFalloffMap && falloffMap.IsNotNull() ? (falloffMap[x,y] * heightMapSettings.falloffSettings.falloffFactor) : 0))
-                    * heightCurve_threadSafe.Evaluate(valuesMap[x,y]) * heightMapSettings.noiseSettings.heightMultiplier).Clamp01().RoundTo(3);
+                valuesMap[x,y] = ((valuesMap[x,y] - (heightMapSettings.FalloffSettings.useFalloffMap && falloffMap.IsNotNull() ? (falloffMap[x,y] * heightMapSettings.FalloffSettings.falloffFactor) : 0))
+                    * heightCurve_threadSafe.Evaluate(valuesMap[x,y]) * heightMapSettings.NoiseSettings.heightMultiplier).Clamp01().RoundTo(3);
                 
                 if (valuesMap[x,y] > maxValue) {
                     maxValue = valuesMap[x,y];
@@ -48,44 +48,59 @@ public static class HeightMapGenerator {
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                for (int i = 0; i < heightMapSettings.regionData.RegionsList.Count; i++) {
-                    float currentHeight = values[x,y].Clamp01();
+                Color terrainColor = Color.black;
+                float heightValue = values[x,y].Clamp01();
+                float previousRangeLimit = 0;
+                float currentRangeLimit = 0;
 
-                    if (currentHeight <= heightMapSettings.regionData.RegionsList.GetElement(i).height) {
-                        colorMap[y * width + x] = heightMapSettings.regionData.RegionsList.GetElement(i).color;
-                        break;
+                for (int i = 0; i < heightMapSettings.RegionData.RegionsList.Count; i++) {
+                    previousRangeLimit = currentRangeLimit;
+                    currentRangeLimit = heightMapSettings.RegionData.RegionsList.GetElement(i).height;
+
+                    if (heightValue >= currentRangeLimit) {
+                        terrainColor = heightMapSettings.RegionData.RegionsList.GetElement(i).worldTile.color;
                     }
                     else {
-                        continue;
+                        break;
                     }
                 }
+
+                // for (int i = heightMapSettings.RegionData.RegionsList.Count - 1; i >= 0; i--) {
+                //     if (heightValue <= previousRangeLimit) {
+                //         terrainColor = heightMapSettings.RegionData.RegionsList.GetElement(i).worldTile.color;
+                //         previousRangeLimit = heightMapSettings.RegionData.RegionsList.GetElement(i).height;
+                //     }
+                //     else {
+                //         break;
+                //     }
+                // }
+
+                colorMap[y * width + x] = terrainColor;
             }
         }
 
         return colorMap;
     }
     
-    public static float[,] GetMapValuesAt(float[,] worldValues, Vector2Int chunkGridPos, int chunkSize) {
-        float[,] mapValues = new float[chunkSize,chunkSize];
+    public static float[,] GetMapValuesAt(float[,] worldValues, Vector2Int chunkGridPos, int widthSize, int heightSize) {
+        float[,] mapValues = new float[widthSize,heightSize];
 
         int totalTilesW = worldValues.GetLength(0);
         int totalTilesH = worldValues.GetLength(1);
-        int totalChunksW = totalTilesW / chunkSize;
-        int totalChunksH = totalTilesH / chunkSize;
+        int totalChunksW = totalTilesW / widthSize;
+        int totalChunksH = totalTilesH / heightSize;
         int halfWidthInChunks = (totalChunksW / 2);
         int halfHeightInChunks = (totalChunksH / 2);
-
-        // Vector2Int sampleCenter = new Vector2Int(chunkLocalPos.x + halfWidthInChunks, chunkLocalPos.y + halfHeightInChunks);
+        
         Vector2Int sampleCenter = chunkGridPos;
-        // Debug.Log(sampleCenter);
 
-        if ((sampleCenter.x * chunkSize > totalTilesW) || (sampleCenter.y * chunkSize > totalTilesH) || (sampleCenter.x < 0) || (sampleCenter.y < 0)) {
+        if ((sampleCenter.x * widthSize > totalTilesW) || (sampleCenter.y * heightSize > totalTilesH) || (sampleCenter.x < 0) || (sampleCenter.y < 0)) {
             return mapValues;
         }
         
-        for (int y = 0; y < chunkSize; y++) {
-            for (int x = 0; x < chunkSize; x++) {
-                mapValues[x,y] = worldValues[(sampleCenter.x * chunkSize) + x, (sampleCenter.y * chunkSize) + y];
+        for (int y = 0; y < heightSize; y++) {
+            for (int x = 0; x < widthSize; x++) {
+                mapValues[x,y] = worldValues[(sampleCenter.x * widthSize) + x, (sampleCenter.y * heightSize) + y];
             }
         }
 

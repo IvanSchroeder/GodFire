@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace UnityUtilities {
@@ -36,6 +37,15 @@ namespace UnityUtilities {
 		class FloatComparer : IEqualityComparer<float> {
 			public bool Equals(float x, float y) => Mathf.Abs(x - y) <= Mathf.Epsilon;
 			public int GetHashCode(float obj) => obj.GetHashCode();
+		}
+
+		public static async Task Delay(float seconds, bool ignoreTimeScale = false) {
+			var elapsed = 0f;
+
+			while (elapsed < seconds) {
+				elapsed += ignoreTimeScale ? Time.unscaledDeltaTime : Time.deltaTime;
+				await Task.Yield();
+			}
 		}
 	}
 }

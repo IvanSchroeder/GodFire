@@ -11,12 +11,16 @@ public class WorldGeneratorEditor : Editor {
 
         if (DrawDefaultInspector()) {
             if (worldGenerator.mapPreview.autoUpdate) {
-                worldGenerator.PreviewWorld();
+                worldGenerator.PreviewWorldInEditor();
             }
         }
 
         if (GUILayout.Button("Preview World")) {
             worldGenerator.PreviewWorld();
+        }
+
+        if (GUILayout.Button("Editor Preview World")) {
+            worldGenerator.PreviewWorldInEditor();
         }
 
         if (GUILayout.Button("Create World Data")) {

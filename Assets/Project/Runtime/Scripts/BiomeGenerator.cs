@@ -10,39 +10,50 @@ public class BiomeGenerator : MonoBehaviour {
     public WorldTile defaultTile;
 
     public List<WorldTile> TilesList = new();
-    Dictionary<TileType, WorldTile> WorldTilesDictionary = new();
+    public SerializedDictionary<int, WorldTile> WorldTilesIDsDictionary = new();
     public SerializedDictionary<WorldTile, int> WorldTilesCountDictionary = new();
 
     void Awake() {
-        WorldTilesDictionary = new();
+        WorldTilesIDsDictionary = new();
         WorldTilesCountDictionary = new();
 
         foreach (WorldTile tile in TilesList) {
-            WorldTilesDictionary.AddIfNotExists(tile.type, tile);
+            WorldTilesIDsDictionary.AddIfNotExists(tile.id, tile);
             WorldTilesCountDictionary.AddIfNotExists(tile, 0);
         }
     }
 
-    public Chunk ProcessChunkColumn(Chunk chunk, int x, int y, float heightValue, HeightMapSettings heightMapSettings) {
-        WorldTile customTile = DetermineWorldTile(heightValue, heightMapSettings);
+    public Chunk ProcessChunkColumn(Chunk chunk, int x, int y, HeightMapSettings heightMapSettings) {
+        WorldTile worldTile = DetermineWorldTile(chunk.GetLocalNoiseValueAt(x, y), heightMapSettings);
+        WorldTilesCountDictionary.AddOrReplace(worldTile, WorldTilesCountDictionary.GetValueOrDefault(defaultTile) + 1);
+        WorldGenerator.Instance.ChunkData.terrainIDsMap[chunk.GridPosition.x + x,chunk.GridPosition.y + y] = worldTile.id;
         
-        chunk.SaveTile(new Vector3Int(x, y, 0), customTile, heightValue);
+        chunk.SaveTile(new Vector3Int(x, y, 0), worldTile);
         
         return chunk;
     }
 
     WorldTile DetermineWorldTile(float heightValue, HeightMapSettings heightMapSettings) {
-        for (int i = 0; i < heightMapSettings.regionData.RegionsList.Count; i++) {
-            if (heightValue <= heightMapSettings.regionData.RegionsList.GetElement(i).height) {
-                WorldTile worldTile = heightMapSettings.regionData.RegionsList.GetElement(i).worldTile;
-                WorldTilesCountDictionary.AddOrReplace(worldTile, WorldTilesCountDictionary.GetValueOrDefault(worldTile) + 1);
-                return worldTile;
+        WorldTile worldTile = defaultTile;
+        float previousRangeLimit = 1;
+
+        for (int i = heightMapSettings.RegionData.RegionsList.Count - 1; i >= 0; i--) {
+            if (heightValue <= previousRangeLimit) {
+                worldTile = heightMapSettings.RegionData.RegionsList.GetElement(i).worldTile;
+                previousRangeLimit = heightMapSettings.RegionData.RegionsList.GetElement(i).height;
             }
             else {
-                continue;
+                break;
             }
+
+            // if (heightValue <= heightMapSettings.RegionData.RegionsList.GetElement(i).height) {
+            //     terrainColor = heightMapSettings.RegionData.RegionsList.GetElement(i).worldTile.color;
+            // }
+            // else {
+            //     continue;
+            // }
         }
 
-        return defaultTile;
+        return worldTile;
     }
 }

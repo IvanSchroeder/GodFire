@@ -7,8 +7,11 @@ using Newtonsoft.Json;
 
 [Serializable]
 public class ChunkData {
-    public Dictionary<Vector3Int, Chunk> ChunksDictionary = new Dictionary<Vector3Int, Chunk>();
-    public Dictionary<Vector3Int, Chunk> ModifiedChunksDictionary = new Dictionary<Vector3Int, Chunk>();
+    [JsonIgnore] public Dictionary<Vector3Int, Chunk> ChunksDictionary = new Dictionary<Vector3Int, Chunk>();
+    [JsonIgnore] public Dictionary<Vector3Int, Chunk> ModifiedChunksDictionary = new Dictionary<Vector3Int, Chunk>();
+    public HeightMap terrainHeightMap = new();
+    public int[,] terrainIDsMap = new int[0,0];
+    public float[,] treesMapValues = new float[0,0];
 
     public ChunkData() {}
 

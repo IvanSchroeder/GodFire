@@ -48,6 +48,8 @@ namespace WorldSimulation {
         
         public float PercentOfRain => CalculatePercentOfRain(TimeSpan.FromSeconds(_rainTimer.GetTime()));
 
+        public TimerManager WeatherTimerManager = new();
+
         public static event Action OnRainStart = delegate {};
         public static event Action OnRainEnd = delegate {};
 
@@ -66,7 +68,9 @@ namespace WorldSimulation {
         protected override void Awake() {
             base.Awake();
 
-            _rainTimer = new CountdownTimer(_rainTimeSeconds);
+            WeatherTimerManager = new();
+
+            _rainTimer = new CountdownTimer(_rainTimeSeconds, ref WeatherTimerManager);
             _psMain = rainEffectParticles.main;
             _psEmission = rainEffectParticles.emission;
 
@@ -97,7 +101,7 @@ namespace WorldSimulation {
             _currentRainTime = WeatherData.RainTime;
 
             if (_rainTimer.IsNull()) {
-                _rainTimer = new CountdownTimer(_currentRainTime);
+                _rainTimer = new CountdownTimer(_currentRainTime, ref WeatherTimerManager);
                 _rainTimer.OnTimerStart += StartRaining;
                 _rainTimer.OnTimerStop += EndRaining;
             }
@@ -118,7 +122,7 @@ namespace WorldSimulation {
             );
 
             if (_isRaining) {
-                if (!infiniteRaining) _rainTimer.Tick(Time.deltaTime * TimeManager.Instance.CurrentTimeSettings.timeMultiplier);
+                if (!infiniteRaining) WeatherTimerManager.UpdateTimers(Time.deltaTime * TimeManager.Instance.CurrentTimeSettings.timeMultiplier);
                 _psMain.simulationSpeed = _currentWeatherSettings.baseRainSpeed * _currentWeatherSettings.rainSpeedCurve.Evaluate(PercentOfRain);
                 _psEmission.rateOverTime = _currentWeatherSettings.baseRainAmount * _currentWeatherSettings.rainAmountCurve.Evaluate(PercentOfRain);
             }
@@ -136,8 +140,6 @@ namespace WorldSimulation {
             AudioManager.instance?.PlayAmbience(_currentWeatherSettings.audioClip);
 
             OnRainStart?.Invoke();
-
-            // Debug.Log(currentRainSettings.rainStartLogMessage);
         }
 
         public void EndRaining() {
@@ -150,7 +152,6 @@ namespace WorldSimulation {
 
             OnRainEnd?.Invoke();
 
-            // Debug.Log(currentRainSettings.rainStopLogMessage);
             _currentWeatherSettings = WeatherSettingsDictionary.GetValueOrDefault(WeatherType.Clear);
         }
 

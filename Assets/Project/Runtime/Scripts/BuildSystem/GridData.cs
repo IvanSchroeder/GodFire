@@ -2,31 +2,53 @@ using UnityEngine;
 using System.Collections.Generic;
 using System;
 using UnityUtilities;
+using System.Linq;
+using Newtonsoft.Json;
 
 [Serializable]
 public class GridData {
-    [SerializeField] public SerializedDictionary<Vector3Int, ObjectPlacementData> PlacedObjectsDictionary;
+    [JsonIgnore] public Dictionary<Vector3Int, WorldObject> WorldObjectsDictionary = new();
+    [SerializeReference] public List<WorldObjectData> WorldObjectsDataList = new();
+    [JsonIgnore] public HashSet<long> IDsHashSet = new();
+    [JsonIgnore] public float[,] worldObjectsValues;
 
-    public GridData() {
-        PlacedObjectsDictionary = new();
-    }
+    public GridData() {}
 
-    public void AddObjectAt(Vector3Int gridPosition, Vector2Int objectSize, int ID, int placedObjectIndex) {
-        List<Vector3Int> positionsToOccupy = CalculatePositions(gridPosition, objectSize);
-        ObjectPlacementData data = new ObjectPlacementData(positionsToOccupy, ID, placedObjectIndex);
+    public void AddObject(Vector3Int gridPosition, WorldObject worldObject, ObjectData objectData) {
+        List<Vector3Int> positionsToOccupy = CalculatePositions(gridPosition, objectData.Size);
 
-        foreach (Vector3Int position in positionsToOccupy) {
-            if (PlacedObjectsDictionary.ContainsKey(position))
-                throw new Exception($"Dictionary alread contais this cell position {position}");
+        if (CanPlaceObjectAt(gridPosition, objectData.Size)) {
+            foreach (Vector3Int position in positionsToOccupy) {
+                WorldObjectsDictionary.AddIfNotExists(position, worldObject);
+            }
             
-            PlacedObjectsDictionary.AddIfNotExists(position, data);
+            long objectUniqueID = GameManager.Instance.SystemRandom.NextLong();
+
+            if (!IDsHashSet.Contains(objectUniqueID))
+                IDsHashSet.Add(objectUniqueID);
+            else {
+                while (IDsHashSet.Contains(objectUniqueID)) {
+                    objectUniqueID = GameManager.Instance.SystemRandom.NextLong();
+                }
+            }
+
+            worldObject.worldObjectData.ObjectPlacementData = new ObjectPlacementData(objectData.ID, gridPosition, objectData.Size, positionsToOccupy);
+            worldObject.ID = objectUniqueID;
+
+            IDsHashSet.Add(objectUniqueID);
+
+            worldObject.Init();
+
+            Debug.Log($"Placed Object {worldObject} with Unique ID {objectUniqueID}");
         }
     }
 
-    public void RemoveObjectAt(Vector3Int gridPosition) {
-        foreach (Vector3Int position in PlacedObjectsDictionary.GetValueOrDefault(gridPosition).OccupiedPositionsList) {
-            PlacedObjectsDictionary.Remove(position);
+    public void RemoveObject(WorldObject worldObject) {
+        foreach (Vector3Int position in worldObject.worldObjectData.ObjectPlacementData.OccupiedPositionsList) {
+            WorldObjectsDictionary.Remove(position);
         }
+
+        IDsHashSet.Remove(worldObject.ID);
     }
 
     List<Vector3Int> CalculatePositions(Vector3Int gridPosition, Vector2Int objectSize) {
@@ -45,17 +67,22 @@ public class GridData {
         List<Vector3Int> positionsToOccupy = CalculatePositions(gridPosition, objectSize);
 
         foreach (var pos in positionsToOccupy) {
-            if (PlacedObjectsDictionary.ContainsKey(pos))
+            if (WorldObjectExists(pos)) {
                 return false;
+                throw new Exception($"Dictionary already contains this cell position! : {pos}");
+            }
         }
 
         return true;
     }
 
     public int GetRepresentationIndex(Vector3Int gridPosition) {
-        if (!PlacedObjectsDictionary.ContainsKey(gridPosition))
+        if (!WorldObjectExists(gridPosition))
             return -1;
         
-        return PlacedObjectsDictionary.GetValueOrDefault(gridPosition).PlacedObjectIndex;
+        // return PlacedObjectsDictionary.GetValueOrDefault(gridPosition).PlacedObjectIndex;
+        return 1;
     }
+
+    public bool WorldObjectExists(Vector3Int gridPosition) => WorldObjectsDictionary.ContainsKey(gridPosition);
 }

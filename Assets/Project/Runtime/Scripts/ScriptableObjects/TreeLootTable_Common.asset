@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e292890c843b9e64f8a51cbb337a94a5, type: 3}
+  m_Name: TreeLootTable_Common
+  m_EditorClassIdentifier: 
+  lootTableEnabled: 1
+  LootDropsList:
+  - itemPrefab: {fileID: 8335815127966692995, guid: 63c634e2ceddb9843a72e9325c4bc660, type: 3}
+    isGuaranteed: 1
+    dropWeight: 100
+    dropAmount: {x: 3, y: 10}
+  - itemPrefab: {fileID: 6503947629989144235, guid: 378ac334a3722d540b5e7991f5e97ebb, type: 3}
+    isGuaranteed: 0
+    dropWeight: 40
+    dropAmount: {x: 2, y: 5}
+  - itemPrefab: {fileID: 6942803011091468336, guid: bfb73e21f831da64e8c662984a207d82, type: 3}
+    isGuaranteed: 0
+    dropWeight: 0
+    dropAmount: {x: 0, y: 0}
+  totalWeight: 40

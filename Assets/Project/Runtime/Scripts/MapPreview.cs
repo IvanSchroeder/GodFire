@@ -37,20 +37,20 @@ public class MapPreview : MonoBehaviour {
         }
         else if (drawMode == DrawMode.WaterMap) {
             DrawTexture(TextureGenerator.TextureFromHeightMap(HeightMapGenerator.GetMapValuesInRange(previewHeightMap.values,
-                heightMapSettings.GetTerrainTypeByTile(TileType.DeepWater).height, 
-                heightMapSettings.GetTerrainTypeByTile(TileType.Water).height, maxInclusive: true, normalized: true),
+                heightMapSettings.GetTerrainTypeByTileType(TileType.DeepWater).height, 
+                heightMapSettings.GetTerrainTypeByTileType(TileType.Sand).height, maxInclusive: false, normalized: true),
                 previewHeightMap.minValue, previewHeightMap.maxValue));
         }
         else if (drawMode == DrawMode.GroundMap) {
             DrawTexture(TextureGenerator.TextureFromHeightMap(HeightMapGenerator.GetMapValuesInRange(previewHeightMap.values,
-                heightMapSettings.GetTerrainTypeByTile(TileType.Sand).height, 
-                heightMapSettings.GetTerrainTypeByTile(TileType.Rock2).height, maxInclusive: true, normalized: true),
+                heightMapSettings.GetTerrainTypeByTileType(TileType.Sand).height, 
+                heightMapSettings.GetTerrainTypeByTileType(TileType.Rock2).height, maxInclusive: true, normalized: true),
                 previewHeightMap.minValue, previewHeightMap.maxValue));
         }
         else if (drawMode == DrawMode.ForestMap) {
             DrawTexture(TextureGenerator.TextureFromHeightMap(HeightMapGenerator.GetMapValuesInRange(previewHeightMap.values,
-                heightMapSettings.GetTerrainTypeByTile(TileType.Grass).height, 
-                heightMapSettings.GetTerrainTypeByTile(TileType.DeepGrass).height, minInclusive: true, maxInclusive: true, normalized: true),
+                heightMapSettings.GetTerrainTypeByTileType(TileType.DeepGrass).height, 
+                heightMapSettings.GetTerrainTypeByTileType(TileType.Rock).height, minInclusive: true, maxInclusive: false, normalized: true),
                 previewHeightMap.minValue, previewHeightMap.maxValue));
         }
         else if (drawMode == DrawMode.CustomMap) {

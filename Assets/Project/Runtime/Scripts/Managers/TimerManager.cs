@@ -1,17 +1,54 @@
 using System.Collections.Generic;
 using UnityUtilities;
+using System;
+using System.Linq;
+using System.Collections.Concurrent;
+using System.ComponentModel;
 
-public static class TimerManager {
-    static readonly List<Timer> timersList = new();
+[Serializable]
+public class TimerManager {
+    public List<Timer> TimersList = new();
 
-    public static void RegisterTimer(Timer timer) => timersList.Add(timer);
-    public static void DeregisterTimer(Timer timer) => timersList.Remove(timer);
+    public void RegisterTimer(Timer timer) => TimersList?.Add(timer);
+    public void DeregisterTimer(Timer timer) => TimersList?.Remove(timer);
 
-    public static void UpdateTimers() {
-        // foreach (var timer in new List<Timer>(timersList)) {
-        //     timer.Tick();
-        // }
+    public void UpdateTimers(float deltaTime) {
+        foreach (var timer in new List<Timer>(TimersList)) {
+            timer.Tick(deltaTime);
+        }
     }
 
-    public static void Clear() => timersList.Clear();
+    public void StartAllTimers() {
+        foreach (var timer in new List<Timer>(TimersList)) {
+            timer.Start();
+        }
+    }
+
+    public void StopAllTimers() {
+        foreach (var timer in new List<Timer>(TimersList)) {
+            timer.Stop();
+        }
+    }
+
+    public void ResumeAllTimers() {
+        foreach (var timer in new List<Timer>(TimersList)) {
+            timer.Resume();
+        }
+    }
+
+    public void PauseAllTimers() {
+        foreach (var timer in new List<Timer>(TimersList)) {
+            timer.Pause();
+        }
+    }
+
+    public void DisposeTimers() {
+        foreach (var timer in new List<Timer>(TimersList)) {
+            timer.Dispose();
+        }
+
+        Clear();
+    }
+
+    public void Clear() => TimersList.Clear();
 }

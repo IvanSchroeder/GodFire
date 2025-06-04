@@ -4,12 +4,10 @@ public class RemovingState : IBuildingState {
     int gameObjectIndex = -1;
     GridLayout grid;
     GridData gridData;
-    ObjectPlacer objectPlacer;
 
-    public RemovingState(GridLayout _grid, GridData _gridData, ObjectPlacer _objectPlacer) {
+    public RemovingState(GridLayout _grid, GridData _gridData) {
         grid = _grid;
         gridData = _gridData;
-        objectPlacer = _objectPlacer;
 
         // previewSystem.StartShowingRemovePreview();
     }
@@ -33,8 +31,8 @@ public class RemovingState : IBuildingState {
             if (gameObjectIndex == -1)
                 return;
 
-            selectedData.RemoveObjectAt(gridPosition);
-            objectPlacer.RemoveObjectAt(gameObjectIndex);
+            // selectedData.RemoveObjectAt(gridPosition);
+            // objectPlacer.RemoveObjectAt(gameObjectIndex);
         }
     }
 

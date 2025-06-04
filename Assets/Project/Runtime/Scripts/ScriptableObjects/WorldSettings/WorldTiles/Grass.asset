@@ -12,7 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b05dd32bda784ff47aabafd1cb363967, type: 3}
   m_Name: Grass
   m_EditorClassIdentifier: 
+  tileName: Grass
+  id: 3
   tile: {fileID: 11400000, guid: 823af818258aa7a4aa3cdceab32059ae, type: 2}
-  id: Grass
   type: 4
   targetTilemap: 2
+  color: {r: 0.6, g: 0.8313726, b: 0, a: 1}

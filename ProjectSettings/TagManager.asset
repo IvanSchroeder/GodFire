@@ -14,8 +14,8 @@ TagManager:
   - Item
   - Enemy
   - Ground
+  - Interactable
   - Campfire
-  - 
   - 
   - 
   - 
