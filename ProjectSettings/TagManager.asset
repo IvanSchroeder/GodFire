@@ -15,10 +15,10 @@ TagManager:
   - Enemy
   - Ground
   - Interactable
-  - Campfire
-  - 
-  - 
-  - 
+  - Burner
+  - WorldObject
+  - Burnable
+  - RenderOnTop
   - 
   - 
   - 

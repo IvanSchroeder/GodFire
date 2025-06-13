@@ -23,21 +23,21 @@ public class DataPersistenceManagerEditor : Editor {
 
         EditorGUILayout.Space();
 
-        if (GUILayout.Button("Create Game Data")) {
-            dataPersistence.CreateGameData();
-        }
+        // if (GUILayout.Button("Create Game Data")) {
+        //     dataPersistence.CreateGameData();
+        // }
 
-        if (GUILayout.Button("Save Game Data")) {
-            dataPersistence.SaveGameData();
-        }
+        // if (GUILayout.Button("Save Game Data")) {
+        //     dataPersistence.SaveGameData();
+        // }
 
-        if (GUILayout.Button("Load Game Data")) {
-            dataPersistence.LoadGameData();
-        }
+        // if (GUILayout.Button("Load Game Data")) {
+        //     dataPersistence.LoadGameData();
+        // }
 
-        if (GUILayout.Button("Delete Game Data")) {
-            dataPersistence.DeleteGameData();
-        }
+        // if (GUILayout.Button("Delete Game Data")) {
+        //     dataPersistence.DeleteGameData();
+        // }
 
         EditorUtility.SetDirty(target);
     }

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b781dd1316509bb498d52987fb88b362, type: 3}
   m_Name: FastItemDespawnSeconds
   m_EditorClassIdentifier: 
-  _value: 5
-  _defaultValue: 5
+  _value: 10
+  _defaultValue: 10
   resetsOnEnable: 0
   resetsOnDisable: 0
