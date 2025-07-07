@@ -65,16 +65,6 @@ public static class HeightMapGenerator {
                     }
                 }
 
-                // for (int i = heightMapSettings.RegionData.RegionsList.Count - 1; i >= 0; i--) {
-                //     if (heightValue <= previousRangeLimit) {
-                //         terrainColor = heightMapSettings.RegionData.RegionsList.GetElement(i).worldTile.color;
-                //         previousRangeLimit = heightMapSettings.RegionData.RegionsList.GetElement(i).height;
-                //     }
-                //     else {
-                //         break;
-                //     }
-                // }
-
                 colorMap[y * width + x] = terrainColor;
             }
         }
@@ -87,10 +77,6 @@ public static class HeightMapGenerator {
 
         int totalTilesW = worldValues.GetLength(0);
         int totalTilesH = worldValues.GetLength(1);
-        int totalChunksW = totalTilesW / widthSize;
-        int totalChunksH = totalTilesH / heightSize;
-        int halfWidthInChunks = (totalChunksW / 2);
-        int halfHeightInChunks = (totalChunksH / 2);
         
         Vector2Int sampleCenter = chunkGridPos;
 
@@ -129,17 +115,17 @@ public static class HeightMapGenerator {
         return rangedValues;
     }
 
-    public static float[,] SetMapValuesAt(float[,] worldValues, float[,] overwriteValues, Vector2Int chunkGridPos, int chunkSize) {
+    public static float[,] SetMapValuesAt(float[,] worldValues, float[,] overwriteValues, Vector2Int chunkGridPos, int widthSize, int heightSize) {
         float[,] modifiedMapValues = worldValues;
 
         Vector2Int sampleCenter = chunkGridPos;
         int i = 0;
         int j = 0;
 
-        for (int y = 0; y < chunkSize; y++) {
-            for (int x = 0; x < chunkSize; x++) {
-                i = (sampleCenter.x * chunkSize) + x;
-                j = (sampleCenter.y * chunkSize) + y;
+        for (int y = 0; y < heightSize; y++) {
+            for (int x = 0; x < widthSize; x++) {
+                i = (sampleCenter.x * widthSize) + x;
+                j = (sampleCenter.y * heightSize) + y;
 
                 if (modifiedMapValues[i,j] != overwriteValues[i,j]) {
                     modifiedMapValues[i,j] = overwriteValues[i,j];

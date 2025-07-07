@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityUtilities;
 using DG.Tweening;
+using System.Collections.Generic;
 
 public class SquashAndStretchController : MonoBehaviour {
     [Flags]
@@ -17,13 +18,13 @@ public class SquashAndStretchController : MonoBehaviour {
     [SerializeField] private Transform transformToAffect;
     [SerializeField] private SquashStretchAxis axisToAffect = SquashStretchAxis.Y;
     [SerializeField] private bool canBeOverwritten;
-    [SerializeField] private bool playOnStart;
 
     [Space(5f)]
     [Header("Animation Settings")]
     [Space(2f)]
-    [SerializeField] private SquashAndStretchSettings squashAndStretchSettings;
-    [SerializeField] private bool resetAfterAnimation = true;
+    // [SerializeField] private bool resetAfterAnimation = true;
+    [SerializeField] private float initialScale = 1f;
+    [SerializeField] private float resetScaleDuration = 0.5f;
 
     [Space(5f)]
     [Header("Looping Settings")]
@@ -42,38 +43,49 @@ public class SquashAndStretchController : MonoBehaviour {
         _initialScaleVector = transformToAffect.localScale;
     }
 
-    private void Start() {
-        if (playOnStart) {
-            PlaySquashAndStretch();
+    public void PlaySquashAndStretch(SquashAndStretchSettings settings) {
+        if (looping && !canBeOverwritten) return;
+
+        switch (settings.animationType) {
+            case SquashAndStretchSettings.AnimationType.Scale:
+                ScaleToTarget(settings);
+                break;
+            case SquashAndStretchSettings.AnimationType.Punch:
+                PunchToTarget(settings);
+                break;
         }
     }
 
-    public void PlaySquashAndStretch() {
-        if (looping && !canBeOverwritten) return;
+    public async void PunchToTarget(SquashAndStretchSettings settings) {
+        ResetToInitialScale(true);
 
-        PunchToTarget();
+        await transformToAffect.DOScale(
+            new Vector3(
+                affectX ? settings.targetScale : 1,
+                affectY ? settings.targetScale : 1,
+                affectZ ? settings.targetScale : 1
+            ),
+            settings.duration).SetEase(Ease.Linear).IsComplete();
+        await transformToAffect.DOScale(
+            new Vector3(
+                affectX ? initialScale : 1,
+                affectY ? initialScale : 1,
+                affectZ ? initialScale : 1
+            ),
+            settings.duration).SetEase(Ease.OutExpo).IsComplete();
     }
 
-    public void PunchToTarget() {
-        transformToAffect.DOComplete();
-        transformToAffect.DOPunchScale(
-            _initialScaleVector.MultiplyBy(new Vector3(
-                affectX ? squashAndStretchSettings.targetScale : 1,
-                affectY ? squashAndStretchSettings.targetScale : 1,
-                affectZ ? squashAndStretchSettings.targetScale : 1
-            )),
-            squashAndStretchSettings.duration,
-            squashAndStretchSettings.vibrato,
-            squashAndStretchSettings.elasticity).SetEase(Ease.OutExpo);
+    public void ScaleToTarget(SquashAndStretchSettings settings) {
+        ResetToInitialScale(true);
+        transformToAffect.DOScale(settings.targetScale, settings.duration).SetEase(Ease.OutExpo);
     }
 
-    public void ScaleToTarget() {
+    public void ResetToInitialScale(bool instant = false) {
         transformToAffect.DOComplete();
-        transformToAffect.DOScale(squashAndStretchSettings.targetScale, squashAndStretchSettings.duration).SetEase(Ease.OutExpo);
-    }
-
-    public void ResetToInitialScale() {
-        transformToAffect.DOComplete();
-        transformToAffect.DOScale(squashAndStretchSettings.initialScale, squashAndStretchSettings.duration).SetEase(Ease.OutExpo);
+        
+        if (instant)
+            transformToAffect.localScale = _initialScaleVector;
+        else
+            transformToAffect.DOScale(initialScale, resetScaleDuration).SetEase(Ease.OutExpo);
     }
 }

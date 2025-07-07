@@ -1,16 +1,21 @@
 using System.Collections.Generic;
 using UnityUtilities;
 using System;
-using System.Linq;
-using System.Collections.Concurrent;
-using System.ComponentModel;
 
 [Serializable]
 public class TimerManager {
     public List<Timer> TimersList = new();
 
-    public void RegisterTimer(Timer timer) => TimersList?.Add(timer);
-    public void DeregisterTimer(Timer timer) => TimersList?.Remove(timer);
+    public void RegisterTimer(Timer timer) => AddTimer(timer);
+    public void DeregisterTimer(Timer timer) => RemoveTimer(timer);
+
+    void AddTimer(Timer timer) {
+        if (!TimersList.Contains(timer)) TimersList?.Add(timer);
+    }
+
+    void RemoveTimer(Timer timer) {
+        if (TimersList.Contains(timer)) TimersList?.Remove(timer);
+    }
 
     public void UpdateTimers(float deltaTime) {
         foreach (var timer in new List<Timer>(TimersList)) {

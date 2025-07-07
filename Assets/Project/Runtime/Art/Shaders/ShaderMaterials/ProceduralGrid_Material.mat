@@ -42,33 +42,33 @@ Material:
     - _CellAlpha: 1
     - _CellThickness: 0.9
     - _CellsAlpha: 0
-    - _CellsThickness: 0
+    - _CellsThickness: 1
     - _CenterGrid: 0
     - _CenterSize: 0
     - _CutoffGrid: 0
     - _CutoutSize: 0
     - _FalloffSize: 0
     - _GridAlpha: 0
-    - _GridHeight: 0
-    - _GridSize: 0
+    - _GridHeight: 1
+    - _GridSize: 16
     - _GridSizeX: 8
     - _GridSizeY: 8
-    - _GridWidth: 0
+    - _GridWidth: 1
     - _Isometric: 1
     - _IsometricGrid: 0
     - _LineAlpha: 1
     - _LineThickness: 0.1
     - _LinesAlpha: 0
     - _LinesThickness: 0
-    - _OddGridOffset: 0
-    - _PPU: 0
+    - _OddGridOffset: 0.5
+    - _PPU: 16
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _RenderCells: 0
+    - _RenderCells: 1
     - _RenderGrid: 0
     - _RenderLines: 0
     - _SnapToInt: 0
-    - _SquaredSize: 0
+    - _SquaredSize: 1
     - _Stretch: 1
     - _Thickness: 0.05
     - _Thicknessv2: 0.9
@@ -76,7 +76,7 @@ Material:
     m_Colors:
     - _CellColor: {r: 1, g: 1, b: 1, a: 1}
     - _CellSize: {r: 1, g: 1, b: 0, a: 0}
-    - _CellsColor: {r: 0, g: 0, b: 0, a: 0}
+    - _CellsColor: {r: 1, g: 0.8443396, b: 0.8443396, a: 1}
     - _GridColor: {r: 0, g: 0, b: 0, a: 1}
     - _LineColor: {r: 0, g: 0, b: 0, a: 1}
     - _LinesColor: {r: 0, g: 0, b: 0, a: 0}

@@ -29,15 +29,10 @@ public class BurnerTrigger : MonoBehaviour {
     }
 
     void OnTriggerEnter2D(Collider2D collider) {
-        // Item burnable = (Item)collider.gameObject.GetComponentInHierarchy<IBurnable>();
-        Item burnable = (Item)collider.gameObject.GetComponentInHierarchy<BurnableTrigger>().BurnableObject;
+        if (collider.gameObject.GetComponentInHierarchy<IBurnable>() is Item burnable)
 
         if (burnable) {
-            Debug.Log($"Entered Burn Trigger: {burnable.name} in {BurnerObject}");
             BurnerObject.OnItemEntered<Item>(burnable);
-        }
-        else {
-            Debug.Log($"No Burnable detected!");
         }
     }
 
@@ -57,12 +52,9 @@ public class BurnerTrigger : MonoBehaviour {
     // }
 
     void OnTriggerExit2D(Collider2D collider) {
-        // Item burnable = (Item)collider.gameObject.GetComponentInHierarchy<IBurnable>();
-
         if (collider.gameObject.GetComponentInHierarchy<IBurnable>() is Item burnable)
 
-        if (burnable != null) {
-            Debug.Log($"Exited Burn Trigger: {burnable.name} from {BurnerObject}");
+        if (burnable) {
             BurnerObject.OnItemExited<Item>(burnable);
         }
     }

@@ -12,6 +12,8 @@ using SaveSystem;
 using WorldSimulation;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using System.Threading.Tasks;
+using AYellowpaper.SerializedCollections;
 
 public class WorldGenerator : Singleton<WorldGenerator>, IDataHandler {
 #region Variables
@@ -22,7 +24,10 @@ public class WorldGenerator : Singleton<WorldGenerator>, IDataHandler {
     [HideInInspector] public WorldData WorldData;
     public ChunkData ChunkData;
     public GridData GridData;
+    public List<Item> WorldItemsList = new();
+    public List<ItemData> ItemDataList;
     [SerializeField] ObjectsDatabaseSO worldObjectsDatabase;
+    [SerializeField] SerializedDictionary<int, GameObject> itemsDatabase;
     public float yPlacementOffset = 0.25f;
     public GridLayout GridLayout;
     public Tilemap GroundTilemap;
@@ -32,6 +37,7 @@ public class WorldGenerator : Singleton<WorldGenerator>, IDataHandler {
     public Dictionary<int, GridLayout> WorldTilemapsDictionary;
     [HideInInspector] public Chunk currentChunk = null;
     public Transform worldObjectsParentTransform = null;
+    public Transform itemObjectsParentTransform = null;
 
     [Space(10f)]
     [Header("Generation Settings")]
@@ -44,6 +50,7 @@ public class WorldGenerator : Singleton<WorldGenerator>, IDataHandler {
     public Vector2Int sampleCenter;
     public int totalWidthTiles = 0;
     public int totalHeightTiles = 0;
+    public int treeSpawningDays = 10;
 
     bool _worldGenerated = false;
     bool _justStartedGeneration = true;
@@ -87,12 +94,14 @@ public class WorldGenerator : Singleton<WorldGenerator>, IDataHandler {
         CameraManager.OnChunkCrossed += UpdateCurrentChunk;
         OnWorldCreated += UpdateChunks;
         OnWorldReloaded += UpdateChunks;
+        TimeManager.OnNewDay += CheckTreeRespawningConditions;
     }
 
     void OnDisable() {
         CameraManager.OnChunkCrossed -= UpdateCurrentChunk;
         OnWorldCreated -= UpdateChunks;
         OnWorldReloaded -= UpdateChunks;
+        TimeManager.OnNewDay -= CheckTreeRespawningConditions;
     }
 
     protected override void Awake() {
@@ -124,17 +133,29 @@ public class WorldGenerator : Singleton<WorldGenerator>, IDataHandler {
     }
 
     public async UniTask InitializeWorldGeneration(bool firstGeneration) {
-        OnWorldGenerationStarted();
+        await OnWorldGenerationStarted();
         
         await GenerateTerrain(firstGeneration);
         await SpawnWorldObjects(firstGeneration);
+        await SpawnWorldItems();
 
         OnWorldGenerationFinished();
 
         await UniTask.Yield();
     }
 
-    private async UniTask GenerateTerrain(bool firstGeneration) {
+    private async UniTask GenerateTerrain(bool firstGeneration) { 
+        await SpawnChunks(firstGeneration);
+
+        currentChunk = ChunkData.GetChunkAt(Vector3Int.zero);
+        _currentChunkPosition = Vector3Int.zero;
+        _lastChunkPosition = Vector3Int.zero;
+        _lastChunkDistanceCheckPosition = Vector3Int.zero;
+
+        await UniTask.Yield();
+    }
+
+    private async UniTask SpawnChunks(bool firstGeneration) {
         totalWidthTiles = worldWidthInChunks * chunkSize;
         totalHeightTiles = worldHeightInChunks * chunkSize;
 
@@ -142,20 +163,15 @@ public class WorldGenerator : Singleton<WorldGenerator>, IDataHandler {
         int halfHeightInChunks = worldHeightInChunks / 2;
 
         Chunk chunk = null;
-        Vector3Int chunkLocalPos;
-        Vector3Int chunkGridPos;
-
-    #if UNITY_EDITOR
-        Helpers.ClearConsole();
-    #endif
-
+        Vector3Int chunkLocalPos, chunkGridPos;
         SetWorldOffset();
 
         if (firstGeneration) {
             ChunkData = new();
             ChunkData.terrainHeightMap = HeightMapGenerator.GenerateHeightMap(totalWidthTiles, totalHeightTiles, heightMapSettings, sampleCenter);
-            ChunkData.terrainIDsMap = new int[totalWidthTiles,totalHeightTiles];
-            ChunkData.treesMapValues = terrainGenerator.GenerateWorldTreesMap(ChunkData.terrainHeightMap.values, heightMapSettings);
+            ChunkData.terrainIDsMap = new int[totalWidthTiles, totalHeightTiles];
+            // await CheckCenterChunkConditions();
+            ChunkData.treesMapValues = terrainGenerator.GenerateTreesMap(ChunkData.terrainHeightMap.values, heightMapSettings);
         }
         else {
             ChunkData = WorldData.ChunkData;
@@ -165,7 +181,10 @@ public class WorldGenerator : Singleton<WorldGenerator>, IDataHandler {
             for (int x = 0; x < worldWidthInChunks; x++) {
                 chunkLocalPos = new Vector3Int(
                     -halfWidthInChunks + (worldWidthInChunks.IsEven() ? 1 : 0) + x,
-                    -halfHeightInChunks + (worldHeightInChunks.IsEven() ? 1 : 0) + y, 0);
+                    -halfHeightInChunks + (worldHeightInChunks.IsEven() ? 1 : 0) + y,
+                    0
+                );
+
                 chunkGridPos = new Vector3Int(x, y, 0);
 
                 // Create the chunks. Later on add check for previously modified chunks because they are different from world generated chunks.
@@ -174,16 +193,46 @@ public class WorldGenerator : Singleton<WorldGenerator>, IDataHandler {
 
                 ChunkData.UpdateChunk(chunkLocalPos, false);
 
-                await WaitFor.Delay(0.001f, true);
+                await UniTask.Delay(1, true);
             }
         }
 
-        currentChunk = ChunkData.GetChunkAt(Vector3Int.zero);
-        _currentChunkPosition = Vector3Int.zero;
-        _lastChunkPosition = Vector3Int.zero;
-        _lastChunkDistanceCheckPosition = Vector3Int.zero;
+        await UniTask.Yield();
+    }
+
+    private async UniTask CheckCenterChunkConditions() {
+        Vector3Int centerFillPosition = Vector3Int.zero.Add(chunkSize / 2, chunkSize / 2);
+
+        int radius = 4;
+
+        float[,] chunkTerrainValues = HeightMapGenerator.GetMapValuesAt(ChunkData.terrainHeightMap.values, Vector2Int.zero, chunkSize, chunkSize);
+
+        for (int y = -radius; y <= radius; y++) {
+            for (int x = -radius; x <= radius; x++) {
+                if (IsInsideCircle(centerFillPosition, new Vector2(x, y), radius)) {
+                    chunkTerrainValues[x,y] = heightMapSettings.GetTerrainTypeByTileType(TileType.Rock2).height;
+                    Debug.Log($"Is Inside Circle: ({centerFillPosition.x + x},{centerFillPosition.y + y})");
+                }
+            }
+        }
+
+        ChunkData.terrainHeightMap.values = HeightMapGenerator.SetMapValuesAt(ChunkData.terrainHeightMap.values, chunkTerrainValues, Vector2Int.zero, chunkSize, chunkSize);
 
         await UniTask.Yield();
+    }
+
+    private bool IsInsideCircle(Vector3 center, Vector3 tilePos, float radius) {
+        float dx = center.x - tilePos.x;
+        float dy = center.y - tilePos.y;
+        float distanceSquared = dx * dx + dy * dy;
+        return distanceSquared <= radius * radius;
+    }
+
+    private bool IsInsideCircle(Vector3Int center, Vector3Int tilePos, float radius) {
+        float dx = center.x - tilePos.x;
+        float dy = center.y - tilePos.y;
+        float distanceSquared = dx * dx + dy * dy;
+        return distanceSquared <= radius * radius;
     }
 
     private async UniTask SpawnWorldObjects(bool firstGeneration) {
@@ -195,10 +244,20 @@ public class WorldGenerator : Singleton<WorldGenerator>, IDataHandler {
         }
     }
 
+    private async UniTask SpawnWorldItems() {
+        foreach (ItemData itemData in WorldData.ItemDataList) {
+            SpawnItemObject(itemsDatabase.GetValueOrDefault(itemData.ItemID), itemData.WorldPosition, Quaternion.identity);
+
+            await UniTask.Delay(1, true);
+        }
+
+        await UniTask.Yield();
+    }
+
     private async UniTask CreateNewWorldObjects() {
         GridData = new();
         await SpawnCampfire();
-        await SpawnTrees();
+        await SpawnTrees(1, true);
     }
 
     private async UniTask PlaceSavedWorldObjects() {
@@ -209,7 +268,7 @@ public class WorldGenerator : Singleton<WorldGenerator>, IDataHandler {
             savedObjectData = worldObjectsDatabase.GetObjectDataByID(data.ObjectPlacementData.ObjectID);
             PlaceObjectAt(savedObjectData.Prefab, data.ObjectPlacementData.OriginalPosition, savedObjectData, data);
 
-            await WaitFor.Delay(objectSpawnSeconds, true);
+            await UniTask.Delay(1, true);
         }
 
         await UniTask.Yield();
@@ -221,21 +280,39 @@ public class WorldGenerator : Singleton<WorldGenerator>, IDataHandler {
 
         PlaceObjectAt(objectData.Prefab, gridPosition, objectData, new CampfireData());
         
-        await WaitFor.Delay(objectSpawnSeconds, true);
+        await UniTask.Delay(1, true);
+    }
+
+    private async void CheckTreeRespawningConditions() {
+        if (TimeManager.Instance.CurrentDay != 0 && TimeManager.Instance.CurrentDay % treeSpawningDays == 0) {
+            await SpawnTrees(100, false);
+        }
+        else {
+            Debug.Log($"Days till new trees spawn: {treeSpawningDays - (TimeManager.Instance.CurrentDay % treeSpawningDays)}");
+        }
 
         await UniTask.Yield();
     }
 
-    private async UniTask SpawnTrees() {
+    private async UniTask SpawnTrees(int delayMilliseconds, bool firstSpawning) {
+        int halfWidthInChunks = worldWidthInChunks / 2;
+        int halfHeightInChunks = worldHeightInChunks / 2;
+
         Chunk chunk;
+        Vector3Int chunkLocalPos;
         ObjectData objectData = worldObjectsDatabase.GetObjectDataByID(TREE);
 
-        for (int y = -chunkManagementSettings.chunkRenderDistance; y <= chunkManagementSettings.chunkRenderDistance; y++) {
-            for (int x = -chunkManagementSettings.chunkRenderDistance; x <= chunkManagementSettings.chunkRenderDistance; x++) {
-                chunk = ChunkData.GetChunkAt(_currentChunkPosition.Add(x, y));
-                chunk = terrainGenerator.PlaceTrees(chunk, ChunkData.treesMapValues, objectData, GridData);
+        for (int y = 0; y < worldHeightInChunks; y++) {
+            for (int x = 0; x < worldWidthInChunks; x++) {
+                chunkLocalPos = new Vector3Int(
+                    -halfWidthInChunks + (worldWidthInChunks.IsEven() ? 1 : 0) + x,
+                    -halfHeightInChunks + (worldHeightInChunks.IsEven() ? 1 : 0) + y,
+                    0
+                );
 
-                await WaitFor.Delay(objectSpawnSeconds, true);
+                chunk = ChunkData.GetChunkAt(chunkLocalPos);
+
+                await terrainGenerator.PlaceTrees(chunk, ChunkData.treesMapValues, objectData, GridData, delayMilliseconds, firstSpawning);
             }
         }
 
@@ -319,7 +396,6 @@ public class WorldGenerator : Singleton<WorldGenerator>, IDataHandler {
         foreach (var pair in ChunkData.ChunksDictionary) {
             if (ChunkData.CheckIfLoaded(pair.Key)) {
                 pair.Value.Unload();
-                // _chunkUnloadQueue.Enqueue(pair.Key);
             }
         }
 
@@ -363,47 +439,33 @@ public class WorldGenerator : Singleton<WorldGenerator>, IDataHandler {
         }
     }
 
-    private void ClearWorldMap() {
-        WaterTilemap.ClearAllTiles();
-        GroundTilemap.ClearAllTiles();
-        TempTilemap.ClearAllTiles();
-    }
-
     private void StopWorldGeneration() {
-        if (_chunkLoadQueue.IsNotNull()) _chunkLoadQueue.Clear();
+        if (_chunkLoadQueue.IsNotNull() && !_chunkLoadQueue.IsEmpty()) _chunkLoadQueue.Clear();
         _chunkLoadQueue = new();
 
-        if (_chunkUnloadQueue.IsNotNull()) _chunkUnloadQueue.Clear();
+        if (_chunkUnloadQueue.IsNotNull() && !_chunkUnloadQueue.IsEmpty()) _chunkUnloadQueue.Clear();
         _chunkUnloadQueue = new();
     }
 
     public void SetWorldOffset(bool manualRandomSeed = false, int seed = 0) {
-        int xOffset = 0;
-        int yOffset = 0;
-
-        if (WorldData.IsNotNull()) {
-            Random.InitState(WorldData.WorldSeed);
-            xOffset = Random.Range(-100000, 100000);
-            yOffset = Random.Range(-100000, 100000);
-            heightMapSettings.NoiseSettings.seed = WorldData.WorldSeed;
-        }
-        else {
-            heightMapSettings.NoiseSettings.seed = seed;
-        }
+        int finalSeed = manualRandomSeed ? seed : WorldData.WorldSeed;
         
+        Random.InitState(finalSeed);
+        int xOffset = Random.Range(-100000, 100000);
+        int yOffset = Random.Range(-100000, 100000);
+        heightMapSettings.NoiseSettings.seed = finalSeed;
         heightMapSettings.NoiseSettings.offset = new Vector2Int(xOffset, yOffset);
     }
 
-    private void OnWorldGenerationStarted() {
+    private async UniTask OnWorldGenerationStarted() {
         _worldGenerated = false;
 
         generationStopwatch = Stopwatch.StartNew();
 
-        ClearWorldMap();
-        worldObjectsParentTransform.DestroyChildren();
+        await ClearGameplayScene();
 
-        _chunkLoadQueue = new Queue<Vector3Int>();
-        _chunkUnloadQueue = new Queue<Vector3Int>();
+        _chunkLoadQueue = new();
+        _chunkUnloadQueue = new();
 
         _justStartedGeneration = true;
         _chunksMovedAmount = 0;
@@ -412,7 +474,7 @@ public class WorldGenerator : Singleton<WorldGenerator>, IDataHandler {
 
     private void OnWorldGenerationFinished() {
         generationStopwatch.Stop();
-        mapPreview.DrawMapInEditor(totalWidthTiles, totalHeightTiles, ChunkData.terrainHeightMap, heightMapSettings);
+        PreviewWorld();
         _worldGenerated = true;
         WorldData.FirstGeneration = false;
         OnWorldCreated?.Invoke();
@@ -420,18 +482,19 @@ public class WorldGenerator : Singleton<WorldGenerator>, IDataHandler {
     }
 
     public void PreviewWorld() {
-        SetWorldOffset();
+        // HeightMap heightMap;
 
-        HeightMap heightMap;
+        // if (WorldData.IsNull() || WorldData.ChunkData.terrainHeightMap.values == null) {
+        //     SetWorldOffset();
+        //     heightMap = HeightMapGenerator.GenerateHeightMap(totalWidthTiles, totalHeightTiles, heightMapSettings, sampleCenter);
+        // }
+        // else {
+        //     heightMap = WorldData.ChunkData.terrainHeightMap;
+        // }
 
-        if (WorldData.IsNull() || WorldData.ChunkData.terrainHeightMap.values == null) {
-            heightMap = HeightMapGenerator.GenerateHeightMap(totalWidthTiles, totalHeightTiles, heightMapSettings, sampleCenter);
-        }
-        else {
-            heightMap = WorldData.ChunkData.terrainHeightMap;
-        }
+        // mapPreview.DrawMapInEditor(totalWidthTiles, totalHeightTiles, heightMap, heightMapSettings);
 
-        mapPreview.DrawMapInEditor(totalWidthTiles, totalHeightTiles, heightMap, heightMapSettings);
+        mapPreview.DrawMapInEditor(totalWidthTiles, totalHeightTiles, WorldData.ChunkData.terrainHeightMap, heightMapSettings);
     }
 
     public void PreviewWorldInEditor() {
@@ -442,14 +505,43 @@ public class WorldGenerator : Singleton<WorldGenerator>, IDataHandler {
         mapPreview.DrawMapInEditor(totalWidthTiles, totalHeightTiles, heightMap, heightMapSettings);
     }
 
-    public void ClearGameplayScene() {
+    public async UniTask ClearGameplayScene() {
         _worldGenerated = false;
         StopWorldGeneration();
 
-        ClearWorldMap();
-        ClearWorldObjects();
+        await ClearWorldMap();
+        await ClearWorldObjects();
+        await ClearWorldItems();
 
         OnWorldCleared?.Invoke();
+
+        await UniTask.Yield();
+    }
+    
+    private async UniTask ClearWorldMap() {
+        await UniTask.SwitchToMainThread();
+
+        WaterTilemap.ClearAllTiles();
+        GroundTilemap.ClearAllTiles();
+        TempTilemap.ClearAllTiles();
+
+        await UniTask.Yield();
+    }
+
+    private async UniTask ClearWorldObjects() {
+        await UniTask.SwitchToMainThread();
+
+        worldObjectsParentTransform.DestroyChildren();
+
+        await UniTask.Yield();
+    }
+
+    private async UniTask ClearWorldItems() {
+        await UniTask.SwitchToMainThread();
+
+        itemObjectsParentTransform.DestroyChildren();
+
+        await UniTask.Yield();
     }
 #endregion
 
@@ -477,10 +569,43 @@ public class WorldGenerator : Singleton<WorldGenerator>, IDataHandler {
         GridData.RemoveObject(worldObject);
         worldObject.transform.gameObject.Destroy();
     }
+#endregion
 
-    public void ClearWorldObjects() {
-        GridData = new();
-        worldObjectsParentTransform.DestroyChildren();
+#region Item Objects Methods
+    public void SpawnItemObject(GameObject prefab, Vector3 position, Quaternion rotation) {
+        GameObject itemGameObject = Instantiate(prefab, position, rotation, itemObjectsParentTransform);
+        Item item = itemGameObject.GetComponent<Item>();
+        RegisterItem(item);
+        RegisterItemData(item.itemData);
+    }
+
+    // public void RemoveItemObject(Vector3Int gridPosition) {
+    //     if (GridData.WorldObjectsDictionary.IsNullOrEmpty() || !GridData.WorldObjectExists(gridPosition))
+    //         return;
+
+    //     WorldObject worldObject = GridData.WorldObjectsDictionary.GetValueOrDefault(gridPosition);
+
+    //     if (worldObject.IsNull())
+    //         return;
+
+    //     GridData.RemoveObject(worldObject);
+    //     worldObject.transform.gameObject.Destroy();
+    // }
+
+    public void RegisterItem(Item item) {
+        if (!WorldItemsList.Contains(item)) WorldItemsList.Add(item);
+    }
+
+    public void DeregisterItem(Item item) {
+        if (WorldItemsList.Contains(item)) WorldItemsList.Remove(item);
+    }
+
+    public void RegisterItemData(ItemData itemData) {
+        if (!ItemDataList.Contains(itemData)) ItemDataList.Add(itemData);
+    }
+
+    public void DeregisterItemData(ItemData itemData) {
+        if (ItemDataList.Contains(itemData)) ItemDataList.Remove(itemData);
     }
 #endregion
 
@@ -488,22 +613,24 @@ public class WorldGenerator : Singleton<WorldGenerator>, IDataHandler {
     public async UniTask CreateData() {
         StopWorldGeneration();
 
-        WorldData = new WorldData(true, DateTime.Now, true);
-
+        WorldData = new WorldData(true, DateTime.Now, "New World", true);
         SetWorldOffset();
         ChunkData.terrainHeightMap = HeightMapGenerator.GenerateHeightMap(totalWidthTiles, totalHeightTiles, heightMapSettings, sampleCenter);
         ChunkData.terrainIDsMap = new int[totalWidthTiles,totalHeightTiles];
-        ChunkData.treesMapValues = terrainGenerator.GenerateWorldTreesMap(ChunkData.terrainHeightMap.values, heightMapSettings);
-        GridData.worldObjectsValues = HeightMapGenerator.GenerateEmptyMap(totalWidthTiles, totalHeightTiles, 0);
+        // await CheckCenterChunkConditions();
+        ChunkData.treesMapValues = terrainGenerator.GenerateTreesMap(ChunkData.terrainHeightMap.values, heightMapSettings);
 
         WorldData.ChunkData = ChunkData;
         WorldData.GridData = GridData;
+        WorldData.ItemDataList = new();
 
         PreviewWorld();
 
         if (!Application.isPlaying) await WriteWorldData();
 
         Debug.Log("Created World Data!");
+
+        await UniTask.Yield();
     }
 
     public async UniTask SaveData() {
@@ -513,11 +640,17 @@ public class WorldGenerator : Singleton<WorldGenerator>, IDataHandler {
         }
 
         StopWorldGeneration();
+
+        foreach (Item item in WorldItemsList) {
+            item.itemDespawnTimer.Pause();
+        }
         
         await WriteWorldData();
 
-        if (Application.isPlaying) {
-            await UniTask.RunOnThreadPool(ReloadWorld);
+        if (Application.isPlaying) await ReloadWorld();
+
+        foreach (Item item in WorldItemsList) {
+            item.itemDespawnTimer.Resume();
         }
 
         // WorldData inputWorld = WorldData;
@@ -542,6 +675,8 @@ public class WorldGenerator : Singleton<WorldGenerator>, IDataHandler {
         // else {
         //     Debug.Log($"Saved {modifiedChunks} modified Chunks!");
         // }
+
+        await UniTask.Yield();
     }
 
     public async UniTask LoadData() {
@@ -551,6 +686,7 @@ public class WorldGenerator : Singleton<WorldGenerator>, IDataHandler {
             WorldData = DataPersistenceManager.Instance.ReadData(WorldData);
             ChunkData = WorldData.ChunkData;
             GridData = WorldData.GridData;
+            ItemDataList = new(WorldData.ItemDataList);
         }
         else {
             await CreateData();
@@ -567,12 +703,10 @@ public class WorldGenerator : Singleton<WorldGenerator>, IDataHandler {
         StopWorldGeneration();
         
         if (DataPersistenceManager.Instance.ClearData(WorldData)) {
-            ClearGameplayScene();
+            await ClearGameplayScene();
             ChunkData = new();
+            GridData = new();
             Debug.Log($"Deleted World Data!");
-        }
-        else {
-            Debug.Log($"World Data doesnt exist!");
         }
 
         await UniTask.Yield();
@@ -594,6 +728,20 @@ public class WorldGenerator : Singleton<WorldGenerator>, IDataHandler {
 
         GridData.WorldObjectsDataList = new(SavedWorldObjectsList);
         WorldData.GridData = GridData;
+
+        // WorldData.ItemDataList = ItemDataList;
+
+        List<ItemData> SavedItemDataList = new();
+
+        foreach (ItemData itemData in ItemDataList) {
+            if (SavedItemDataList.Contains(itemData)) continue;
+
+            SavedItemDataList.Add(itemData);
+
+            await UniTask.Yield();
+        }
+
+        WorldData.ItemDataList = new(SavedItemDataList);
 
         DataPersistenceManager.Instance.WriteData(WorldData);
 

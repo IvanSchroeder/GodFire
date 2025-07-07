@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 using UnityEngine;
 using UnityUtilities;
@@ -10,6 +11,7 @@ public class WorldData {
     [SerializeField] bool _firstGeneration = true;
     [SerializeField] GridData _gridData = new();
     [SerializeField] ChunkData _chunkData = new();
+    [SerializeField] List<ItemData> _itemDataList = new();
     [SerializeField] DateTime _creationTime = DateTime.Now;
     [SerializeField] DateTime _lastSavedTime = DateTime.Now;
 
@@ -18,22 +20,20 @@ public class WorldData {
     [JsonIgnore] public bool FirstGeneration { get => _firstGeneration; set => _firstGeneration = value; }
     [JsonIgnore] public ChunkData ChunkData { get => _chunkData; set => _chunkData = value; }
     [JsonIgnore] public GridData GridData { get => _gridData; set => _gridData = value; }
+    [JsonIgnore] public List<ItemData> ItemDataList { get => _itemDataList; set => _itemDataList = value; }
     [JsonIgnore] public DateTime CreationTime { get => _creationTime; set => _creationTime = value; }
     [JsonIgnore] public DateTime LastSavedTime { get => _lastSavedTime; set => _lastSavedTime = value; }
 
     public WorldData() {}
 
-    public WorldData(bool randomizeSeed, int customSeed = 0) {
-        int worldSeed = (randomizeSeed ? GenerateSeed() : customSeed).Clamp(int.MinValue, int.MaxValue);
-        _worldSeed = worldSeed;
-    }
-
-    public WorldData(bool isNew, DateTime dateTime, bool randomizeSeed = true, int customSeed = 0) {
+    public WorldData(bool isNew, DateTime dateTime, string worldName = "", bool randomizeSeed = true, int customSeed = 0) {
         if (isNew) {
-            int worldSeed = (randomizeSeed ? GenerateSeed() : customSeed).Clamp(int.MinValue, int.MaxValue);
-            _worldSeed = worldSeed;
+            _worldName = worldName;
+            _worldSeed = (randomizeSeed ? GenerateSeed() : customSeed).Clamp(int.MinValue, int.MaxValue);
             _firstGeneration = true;
             _creationTime = dateTime;
+
+            Debug.Log($"Created {_worldName} seeded {_worldSeed}");
         }
 
         _lastSavedTime = dateTime;
@@ -42,4 +42,12 @@ public class WorldData {
     public int GenerateSeed() {
         return UnityEngine.Random.Range(int.MinValue, int.MaxValue);
     }
+
+    // public void RegisterItemData(ItemData itemData) {
+    //     if (!ItemDataList.Contains(itemData)) ItemDataList.Add(itemData);
+    // }
+
+    // public void DeregisterItemData(ItemData itemData) {
+    //     if (ItemDataList.Contains(itemData)) ItemDataList.Remove(itemData);
+    // }
 }

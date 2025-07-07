@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using System;
 using System.Linq;
 
 [CreateAssetMenu(fileName = "WorldObjectsDatabase", menuName = "Data/Objects/World Objects Database")]

@@ -15,4 +15,5 @@ public class DraggableSettingsSO : ScriptableObject {
     public float rotationAmount = 15f;
     public float rotationSpeed = 15f;
     public int defaultSortingOrder = 0;
+    public int pickupSortingOrder = 500;
 }

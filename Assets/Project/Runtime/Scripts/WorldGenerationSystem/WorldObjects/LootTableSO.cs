@@ -47,6 +47,27 @@ using AYellowpaper.SerializedCollections;
 //     }
 // }
 
+[Serializable]
+public struct LootRarity {
+    public bool IsGuaranteed;
+    [Min(0)] public int DropsChance;
+    public List<LootDrop> LootDropsList;
+
+    public LootRarity(int _dropsChance, bool _isGuaranteed, List<LootDrop> _lootDropsList) {
+        DropsChance = _dropsChance;
+        IsGuaranteed = _isGuaranteed;
+        LootDropsList = _lootDropsList; 
+    }
+}
+
+[Serializable]
+public class LootDrop {
+    public GameObject itemPrefab;
+    public bool isGuaranteed = false;
+    [Range(0, 100)] public int dropWeight = 100;
+    [MinMaxSlider(0,100)] public Vector2Int dropAmount = new Vector2Int(0, 1);
+}
+
 [CreateAssetMenu(fileName = "NewLootTable", menuName = "Loot System/Loot Table")]
 public class LootTableSO : ScriptableObject {
     public bool lootTableEnabled = true;
@@ -55,7 +76,14 @@ public class LootTableSO : ScriptableObject {
         { UNCOMMON_TABLE, new() },
         { RARE_TABLE, new() }
     };
+    [field: SerializeField] public SerializedDictionary<string, LootRarity> LootRaritiesDictionary { get; set; } = new() {
+        { COMMON_TABLE, new() },
+        { UNCOMMON_TABLE, new() },
+        { RARE_TABLE, new() }
+    };
     [Min(0)] public int totalWeight = 0;
+    public bool lootTableGuaranteed = true;
+    [Min(0)] public int lootTableChance = 0;
     bool isInitialized = false;
 
     public static readonly string COMMON_TABLE = "Common";
@@ -135,12 +163,4 @@ public class LootTableSO : ScriptableObject {
 
         return droppedLoot;
     }
-}
-
-[Serializable]
-public class LootDrop {
-    public GameObject itemPrefab;
-    public bool isGuaranteed = false;
-    [Range(0, 100)] public int dropWeight = 100;
-    [MinMaxSlider(0,100)] public Vector2Int dropAmount = new Vector2Int(0, 1);
 }

@@ -256,9 +256,6 @@ namespace WorldSimulation {
             if (DataPersistenceManager.Instance.ClearData(WeatherData)) {
                 Debug.Log($"Deleted Weather Data!");
             }
-            else {
-                Debug.Log($"Weather Data doesnt exist!");
-            }
 
             _weatherInitialized = false;
 

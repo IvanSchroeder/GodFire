@@ -85,7 +85,7 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_MaskInteraction: 0
+  m_MaskInteraction: 2
   m_SpriteSortPoint: 1
 --- !u!1 &6119518548747194113
 GameObject:
@@ -176,15 +176,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2688830471639111498, guid: e7ee2038746e53841980ccf047d948d6, type: 3}
       propertyPath: TriggerSize.x
-      value: 0.5
+      value: 0.25
       objectReference: {fileID: 0}
     - target: {fileID: 2688830471639111498, guid: e7ee2038746e53841980ccf047d948d6, type: 3}
       propertyPath: TriggerSize.y
-      value: 0.75
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 2688830471639111498, guid: e7ee2038746e53841980ccf047d948d6, type: 3}
       propertyPath: TriggerOffset.y
-      value: 0.25
+      value: 0.15
       objectReference: {fileID: 0}
     - target: {fileID: 2688830471639111498, guid: e7ee2038746e53841980ccf047d948d6, type: 3}
       propertyPath: HasInteractabilityCooldown
@@ -196,15 +196,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2977027401075273343, guid: e7ee2038746e53841980ccf047d948d6, type: 3}
       propertyPath: m_Size.x
-      value: 0.5
+      value: 0.25
       objectReference: {fileID: 0}
     - target: {fileID: 2977027401075273343, guid: e7ee2038746e53841980ccf047d948d6, type: 3}
       propertyPath: m_Size.y
-      value: 0.75
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 2977027401075273343, guid: e7ee2038746e53841980ccf047d948d6, type: 3}
       propertyPath: m_Offset.y
-      value: 0.25
+      value: 0.15
       objectReference: {fileID: 0}
     - target: {fileID: 6513225953085598474, guid: e7ee2038746e53841980ccf047d948d6, type: 3}
       propertyPath: m_Name

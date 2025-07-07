@@ -5,7 +5,38 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 
 [Serializable]
+public class ItemData {
+    [SerializeField] string _name = "NewItem";
+    [SerializeField] UniqueID _id = new();
+    [SerializeField] int _itemID = -1;
+    [SerializeField] Vector3 _worldPosition = Vector3.zero;
+
+    public string Name {
+        get => _name;
+        set => _name = value;
+    }
+
+    public UniqueID ID {
+        get => _id;
+        set => _id = value;
+    }
+
+    public int ItemID {
+        get => _itemID;
+        set => _itemID = value;
+    }
+
+    public Vector3 WorldPosition {
+        get => _worldPosition;
+        set => _worldPosition = value;
+    }
+
+    public ItemData() {}
+}
+
+[Serializable]
 public class Item : MonoBehaviour, IDraggable, IBurnable, IHoverable {
+    [SerializeField] public ItemData itemData = new();
     [SerializeField] SpriteRenderer itemSprite;
     [SerializeField] SpriteRenderer dropShadowSprite;
     [SerializeField] FloatSO ItemDespawnSeconds;
@@ -36,10 +67,8 @@ public class Item : MonoBehaviour, IDraggable, IBurnable, IHoverable {
     Vector2 originalSpritePosition;
     Vector2 targetItemPosition;
     Vector2 itemVelocityRef;
-    Vector2 spriteVelocity;
-    int originalSortingOrder;
 
-    CountdownTimer itemDespawnTimer;
+    public CountdownTimer itemDespawnTimer;
 
     public float timeTillDespawn = 0;
 
@@ -58,8 +87,11 @@ public class Item : MonoBehaviour, IDraggable, IBurnable, IHoverable {
     }
 
     void OnDisable() {
-        itemDespawnTimer.Stop();
         itemDespawnTimer.OnTimerStop -= DespawnObject;
+        itemDespawnTimer.Stop();
+
+        WorldGenerator.Instance.DeregisterItem(this);
+        WorldGenerator.Instance.DeregisterItemData(itemData);
     }
 
     void Awake() {
@@ -76,7 +108,6 @@ public class Item : MonoBehaviour, IDraggable, IBurnable, IHoverable {
         IsBurntOut = false;
         IsBurning = false;
         targetItemPosition = transform.position;
-        originalSortingOrder = DraggableSettings.defaultSortingOrder;
         originalSpritePosition = Vector2.zero.Add(y: spriteOffset);
         itemSprite.transform.localPosition = originalSpritePosition.Add(y: DraggableSettings.pickupOffsetY.Value);
 
@@ -86,15 +117,19 @@ public class Item : MonoBehaviour, IDraggable, IBurnable, IHoverable {
 
     void Update() {
         transform.position = Vector2.SmoothDamp(transform.position, targetItemPosition, ref itemVelocityRef, DraggableSettings.velocity * Time.deltaTime);
-        if (IsDragging)
-            itemSprite.transform.localPosition = Vector2.SmoothDamp(itemSprite.transform.localPosition, originalSpritePosition.Add(y: DraggableSettings.pickupOffsetY.Value), ref spriteVelocity, DraggableSettings.pickupSpeed * Time.deltaTime);
+        UpdateDropShadow();
+        RotateItem();
+        timeTillDespawn = itemDespawnTimer.IsNotNull() ? itemDespawnTimer.GetTime() : 0;
 
+        itemData.WorldPosition = transform.position;
+    }
+
+    void UpdateDropShadow() {
         DistanceToFloor = (transform.position.y - itemSprite.transform.position.y).AbsoluteValue();
         dropShadowSprite.material.SetFloat(ALTITUDE, DistanceToFloor);
+    }
 
-        if (itemDespawnTimer.IsNotNull()) timeTillDespawn = itemDespawnTimer.GetTime();
-        else timeTillDespawn = 0;
-
+    void RotateItem() {
         if (!DraggableSettings.rotateItemOnPickup) return;
 
         Vector2 movement = transform.position.ToVector2() - targetItemPosition;
@@ -109,9 +144,10 @@ public class Item : MonoBehaviour, IDraggable, IBurnable, IHoverable {
         DragCollider.enabled = false;
 
         itemSprite.transform.DOComplete();
+        itemSprite.transform.DOLocalMove(originalSpritePosition.Add(y: DraggableSettings.pickupOffsetY.Value), DraggableSettings.pickupSpeed).SetEase(Ease.OutExpo); 
         itemSprite.transform.DOScale(DraggableSettings.pickupScale, DraggableSettings.scaleSpeed).SetEase(Ease.OutExpo);
 
-        itemSprite.sortingOrder = 500;
+        itemSprite.sortingOrder = DraggableSettings.pickupSortingOrder;
 
         AudioManager.Instance?.PlaySFX("GrassStep", true);
 
@@ -124,21 +160,19 @@ public class Item : MonoBehaviour, IDraggable, IBurnable, IHoverable {
         targetItemPosition = offsetPos;
     }
 
-    public void OnDrop(Vector3 pos) {
+    public async void OnDrop(Vector3 pos) {
         IsDragging = false;
         DragCollider.enabled = true;
 
         targetItemPosition = pos;
 
-        itemSprite.transform.DOComplete();
-        itemSprite.transform.DOLocalMoveY(originalSpritePosition.y, DraggableSettings.fallDuration).SetEase(Ease.OutBounce);
-        itemSprite.transform.DOScale(new Vector2(1, 1), DraggableSettings.scaleSpeed).SetEase(Ease.OutExpo);
-
-        itemSprite.sortingOrder = originalSortingOrder;
+        itemSprite.sortingOrder = DraggableSettings.defaultSortingOrder;
 
         itemDespawnTimer.Restart(ItemDespawnSeconds.Value);
 
-        // BurnableTrigger.SetBurnableState(true);
+        itemSprite.transform.DOComplete();
+        itemSprite.transform.DOScale(Vector2.one, DraggableSettings.scaleSpeed).SetEase(Ease.OutExpo);
+        await itemSprite.transform.DOLocalMoveY(originalSpritePosition.y, DraggableSettings.fallDuration).SetEase(Ease.OutBounce).IsComplete(); 
 
         OnItemDrop?.Invoke();
     }
@@ -184,10 +218,10 @@ public class Item : MonoBehaviour, IDraggable, IBurnable, IHoverable {
     }
 
     public void OnPointerEnter(PointerEventData eventData) {
-        itemSprite.sortingOrder = 500;
+        itemSprite.sortingOrder = DraggableSettings.pickupSortingOrder;
     }
 
     public void OnPointerExit(PointerEventData eventData) {
-        itemSprite.sortingOrder = originalSortingOrder;
+        itemSprite.sortingOrder = DraggableSettings.defaultSortingOrder;
     }
 }

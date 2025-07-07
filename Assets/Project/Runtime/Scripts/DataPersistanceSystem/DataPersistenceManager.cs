@@ -78,7 +78,7 @@ namespace SaveSystem {
         #endif
         }
 
-        public async void CreateGameData(string profileId) {
+        public async UniTask CreateGameData(string profileId) {
             SetSelectedProfileId(profileId);
             foreach (IDataHandler dataHandler in DataHandlersList) {
                 await dataHandler.CreateData();
@@ -87,9 +87,7 @@ namespace SaveSystem {
             await UniTask.Yield();
         }
 
-        public async void SaveGameData(string profileId) {
-            SetSelectedProfileId(profileId);
-
+        public async UniTask SaveGameData() {
             foreach (IDataHandler dataHandler in DataHandlersList) {
                 await dataHandler.SaveData();
             }
@@ -97,7 +95,15 @@ namespace SaveSystem {
             await UniTask.Yield();
         }
 
-        public async void LoadGameData(string profileId) {
+        public async void SaveOnMenu() {
+            foreach (IDataHandler dataHandler in DataHandlersList) {
+                await dataHandler.SaveData();
+            }
+
+            await UniTask.Yield();
+        }
+
+        public async UniTask LoadGameData(string profileId) {
             SetSelectedProfileId(profileId);
 
             foreach (IDataHandler dataHandler in DataHandlersList) {
@@ -107,7 +113,7 @@ namespace SaveSystem {
             await UniTask.Yield();
         }
 
-        public async void DeleteGameData(string profileId) {
+        public async UniTask DeleteGameData(string profileId) {
             SetSelectedProfileId(profileId);
 
             foreach (IDataHandler dataHandler in DataHandlersList) {

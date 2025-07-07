@@ -1,8 +1,8 @@
 {
   "$type": "WeatherData, Project.Runtime",
-  "_weatherType": "HeavyRain",
-  "_isRaining": true,
-  "_rainChance": 1.0,
-  "_rainTime": 268674.438,
-  "_maxRainTime": 292934.0
+  "_weatherType": "Clear",
+  "_isRaining": false,
+  "_rainChance": 4.22947645,
+  "_rainTime": 0.0,
+  "_maxRainTime": 564.0
 }

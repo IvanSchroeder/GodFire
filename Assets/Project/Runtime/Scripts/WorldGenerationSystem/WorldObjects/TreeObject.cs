@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using DG.Tweening;
 using AYellowpaper.SerializedCollections;
-using UnityEngine.EventSystems;
 
 [Serializable]
 public class TreeData : WorldObjectData {
@@ -143,9 +142,7 @@ public class TreeObject : WorldObject, IInteractable, IDestroyable, IItemSpawner
                 int dropAmount = allLootDropsList[i].Item2;
 
                 for (int j = 0; j < dropAmount; j++) {
-                    Instantiate(lootDrop.itemPrefab, (UnityEngine.Random.insideUnitCircle * SpawnRadius) + spawnLocation.ToVector2(), Quaternion.identity, WorldGenerator.Instance.worldObjectsParentTransform);
-                    
-                    // Item item = itemToSpawn.GetComponentInHierarchy<Item>();
+                    WorldGenerator.Instance.SpawnItemObject(lootDrop.itemPrefab, (UnityEngine.Random.insideUnitCircle * SpawnRadius) + spawnLocation.ToVector2(), Quaternion.identity);
 
                     if (DelaySpawn) {
                         AudioManager.Instance.PlaySFX("Pop", false);

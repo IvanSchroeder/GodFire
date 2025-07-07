@@ -20,9 +20,36 @@ MonoBehaviour:
       - itemPrefab: {fileID: 8335815127966692995, guid: 63c634e2ceddb9843a72e9325c4bc660, type: 3}
         isGuaranteed: 0
         dropWeight: 33
-        dropAmount: {x: 1, y: 2}
+        dropAmount: {x: 1, y: 1}
     - Key: Uncommon
       Value: []
     - Key: Rare
       Value: []
+  <LootRaritiesDictionary>k__BackingField:
+    _serializedList:
+    - Key: Common
+      Value:
+        IsGuaranteed: 0
+        DropsChance: 33
+        LootDropsList:
+        - itemPrefab: {fileID: 8335815127966692995, guid: 63c634e2ceddb9843a72e9325c4bc660, type: 3}
+          isGuaranteed: 0
+          dropWeight: 33
+          dropAmount: {x: 1, y: 1}
+    - Key: Uncommon
+      Value:
+        IsGuaranteed: 0
+        DropsChance: 10
+        LootDropsList:
+        - itemPrefab: {fileID: 8335815127966692995, guid: 63c634e2ceddb9843a72e9325c4bc660, type: 3}
+          isGuaranteed: 0
+          dropWeight: 10
+          dropAmount: {x: 2, y: 2}
+    - Key: Rare
+      Value:
+        IsGuaranteed: 0
+        DropsChance: 0
+        LootDropsList: []
   totalWeight: 33
+  lootTableGuaranteed: 1
+  lootTableChance: 0

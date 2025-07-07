@@ -24,6 +24,7 @@ namespace WorldSimulation {
         public bool PassTime { get => _passTime; set => _passTime = value; }
         [SerializeField] float _inGameDeltaTime;
         public float InGameDeltaTime { get => _inGameDeltaTime; }
+        public int CurrentDay { get => timeService.CurrentDay; }
 
         public int startDay = 0;
         [Range(0, 23)] public float startHour = 9;
@@ -131,6 +132,8 @@ namespace WorldSimulation {
 
         private void Start() {
             mainCamera = this.GetMainCamera();
+            UpdateCurrentDay();
+            UpdateDayPeriod();
 
             OnGameStart?.Invoke();
         }
@@ -142,8 +145,6 @@ namespace WorldSimulation {
         }
 
         public void InitializeWorldTime() {
-            timeService.SetCurrentTime(TimeData.WorldTime);
-            timeService.SetCurrentDay(TimeData.WorldDay);
             _timeInitialized = true;
         }
 
@@ -202,9 +203,9 @@ namespace WorldSimulation {
             if (WeatherManager.Instance.IsRaining) return;
 
             if (timeService.IsDayTime)
-                AudioManager.instance.PlayAmbience("ClearDay", false);
+                AudioManager.Instance.PlayAmbience("ClearDay", false);
             else
-                AudioManager.instance.PlayAmbience("Night", false);
+                AudioManager.Instance.PlayAmbience("Night", false);
         }
 
         public void NextTimeSettings() {
@@ -225,7 +226,7 @@ namespace WorldSimulation {
 
             timeSettingsIndex--;
 
-            if (timeSettingsIndex <= 0) {
+            if (timeSettingsIndex < 0) {
                 timeSettingsIndex = TimeSettingsList.Count - 1;
             }
 
@@ -254,6 +255,9 @@ namespace WorldSimulation {
                 startDay
             );
 
+            timeService.SetCurrentTime(TimeData.WorldTime);
+            timeService.SetCurrentDay(TimeData.WorldDay);
+
             DataPersistenceManager.Instance.WriteData(TimeData);
 
             Debug.Log("Created Time Data!");
@@ -280,6 +284,8 @@ namespace WorldSimulation {
         public async UniTask LoadData() {
             if (DataPersistenceManager.Instance.CheckData(TimeData)) {
                 TimeData = DataPersistenceManager.Instance.ReadData(TimeData);
+                timeService.SetCurrentTime(TimeData.WorldTime);
+                timeService.SetCurrentDay(TimeData.WorldDay);
             }
             else {
                 await CreateData();
@@ -291,9 +297,6 @@ namespace WorldSimulation {
         public async UniTask DeleteData() {
             if (DataPersistenceManager.Instance.ClearData(TimeData)) {
                 Debug.Log($"Deleted Time Data!");
-            }
-            else {
-                Debug.Log($"Time Data doesnt exist!");
             }
 
             _timeInitialized = false;

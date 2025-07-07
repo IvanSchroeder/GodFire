@@ -1,5 +1,5 @@
 using UnityEngine;
 using UnityUtilities;
 
-public class OptionsManager : MonoBehaviour {
+public class OptionsManager : Singleton<OptionsManager> {
 }

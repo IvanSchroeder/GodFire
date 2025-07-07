@@ -10,7 +10,6 @@ public class GridData {
     [JsonIgnore] public Dictionary<Vector3Int, WorldObject> WorldObjectsDictionary = new();
     [SerializeReference] public List<WorldObjectData> WorldObjectsDataList = new();
     [JsonIgnore] public HashSet<long> IDsHashSet = new();
-    [JsonIgnore] public float[,] worldObjectsValues;
 
     public GridData() {}
 
@@ -34,8 +33,6 @@ public class GridData {
 
             worldObjectData.ObjectPlacementData = new ObjectPlacementData(objectData.ID, gridPosition, objectData.Size, positionsToOccupy);
             worldObject.ID = objectUniqueID;
-
-            // worldObject.worldObjectData.ObjectPlacementData = new ObjectPlacementData(objectData.ID, gridPosition, objectData.Size, positionsToOccupy);
 
             worldObject.SetObjectData(worldObjectData);
 

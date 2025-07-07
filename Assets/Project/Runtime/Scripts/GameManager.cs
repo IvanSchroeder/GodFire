@@ -2,19 +2,24 @@ using UnityEngine;
 using UnityUtilities;
 
 public class GameManager : Singleton<GameManager> {
-    public AudioManager AudioManager { get; private set; }
-    public OptionsManager OptionsManager { get; private set; }
+    public GameManager GameManagerInstance { get => Instance; }
+    public AudioManager AudioManagerInstance { get => AudioManager.Instance; }
+    public OptionsManager OptionsManagerInstance { get => OptionsManager.Instance; }
+    public UIManager UIManagerInstance { get => UIManager.Instance; }
 
     public System.Random SystemRandom = new();
 
     protected override void Awake() {
         base.Awake();
 
-        // DontDestroyOnLoad(gameObject);
-        // InitializeManagers();
+        DontDestroyOnLoad(gameObject);
     }
 
-    void Update() {
+    private async void Start() {
+        await UIManagerInstance.Init();
+    }
+
+    private void Update() {
         if (Input.GetKeyDown(KeyCode.Escape)) {
             ExitGame();
         }
@@ -24,11 +29,6 @@ public class GameManager : Singleton<GameManager> {
         // else if (Input.GetKeyDown(KeyCode.L)) {
         //     PauseEditor();
         // }
-    }
-
-    private void InitializeManagers() {
-        AudioManager = GetComponentInChildren<AudioManager>();
-        OptionsManager = GetComponentInChildren<OptionsManager>();
     }
 
     public void ExitGame() {

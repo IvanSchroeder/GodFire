@@ -1,5 +1,42 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2107042867882745635
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 133829567067337293}
+  m_Layer: 0
+  m_Name: ButtonTransform
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &133829567067337293
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2107042867882745635}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 3793618118736699815}
+  - {fileID: 9184500180121870596}
+  m_Father: {fileID: 2128200250776194955}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &5371938281522037594
 GameObject:
   m_ObjectHideFlags: 0
@@ -30,7 +67,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 2128200250776194955}
+  m_Father: {fileID: 133829567067337293}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -67,8 +104,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Button
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 96272f656b63d804d80b79399fa37716, type: 2}
-  m_sharedMaterial: {fileID: 2625830490333714357, guid: 96272f656b63d804d80b79399fa37716, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 6c768be4c1748a64b98e4cfae222884c, type: 2}
+  m_sharedMaterial: {fileID: -3919151033795101262, guid: 6c768be4c1748a64b98e4cfae222884c, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -92,10 +129,10 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 44.5
-  m_fontSizeBase: 48
+  m_fontSize: 25
+  m_fontSizeBase: 25
   m_fontWeight: 400
-  m_enableAutoSizing: 1
+  m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
@@ -166,7 +203,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 2128200250776194955}
+  m_Father: {fileID: 133829567067337293}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -243,8 +280,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 3793618118736699815}
-  - {fileID: 9184500180121870596}
+  - {fileID: 133829567067337293}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -303,19 +339,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2874088642970278576}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 6662016905218599138}
-        m_TargetAssemblyTypeName: SquashAndStretchController, Project.Runtime
-        m_MethodName: PlaySquashAndStretch
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &5063866069699294283
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -342,11 +366,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0cb5fbae09b2334fa035480a0e332b6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  transformToAffect: {fileID: 2128200250776194955}
+  transformToAffect: {fileID: 133829567067337293}
   axisToAffect: 3
   canBeOverwritten: 0
-  playOnStart: 0
-  squashAndStretchSettings: {fileID: 11400000, guid: 616823fcb1306f545b11327a8f5c2f2d, type: 2}
-  resetAfterAnimation: 1
+  initialScale: 1
+  resetScaleDuration: 0.5
   looping: 0
   loopingDelay: 0.5

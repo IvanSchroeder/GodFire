@@ -41,7 +41,6 @@ namespace UnityUtilities {
             }
         }
         
-        // public abstract void Tick(float deltaTime);
         public abstract void Tick(float deltaTime);
         public abstract bool IsFinished { get; }
 

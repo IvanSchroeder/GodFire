@@ -222,6 +222,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4b4b7722c65d674d8c111f2a0721f26, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  itemData:
+    _name: Branch
+    _id:
+      Value: 0
+    _itemID: 0
+    _worldPosition: {x: 0, y: 0, z: 0}
   itemSprite: {fileID: 3693646202454148337}
   dropShadowSprite: {fileID: 3737073584101314755}
   ItemDespawnSeconds: {fileID: 11400000, guid: 6b1da7e3b04b91b459b2b2fce272f239, type: 2}
@@ -238,6 +244,7 @@ MonoBehaviour:
   <BurnAmount>k__BackingField: 100
   <BurnRate>k__BackingField: 1
   <AdditionalFuelAmount>k__BackingField: 10
+  timeTillDespawn: 0
 --- !u!61 &9145546951995823234
 BoxCollider2D:
   m_ObjectHideFlags: 0

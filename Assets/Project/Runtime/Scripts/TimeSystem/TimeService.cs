@@ -78,7 +78,6 @@ namespace WorldSimulation {
             // isPastNoon.Value = IsPastNoon;
             // isPastMidnight.Value = IsPastMidnight;
             currentHour.Value = currentTime.Hour;
-            currentDay.Value = CurrentDay;
 
             CycleDayPeriod();
         }
@@ -147,8 +146,11 @@ namespace WorldSimulation {
             OnDayPeriodChange?.Invoke();
         }
 
-        public void SetCurrentDay(int current) => CurrentDay = current;
-        void NewDay() => SetCurrentDay(CurrentDay++);
+        public void SetCurrentDay(int current) {
+            CurrentDay = current;
+            currentDay.Value = CurrentDay;
+        }
+        void NewDay() => SetCurrentDay(CurrentDay + 1);
 
         TimeSpan CalculateDifference(TimeSpan from, TimeSpan to) {
             TimeSpan difference = to - from;

@@ -297,8 +297,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: '[World Name]'
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 6c768be4c1748a64b98e4cfae222884c, type: 2}
+  m_sharedMaterial: {fileID: -3919151033795101262, guid: 6c768be4c1748a64b98e4cfae222884c, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -480,11 +480,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2564670040729712743, guid: d2d7d9b924352a442861b88bc01b2aa9, type: 3}
       propertyPath: m_fontSize
-      value: 60
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 2564670040729712743, guid: d2d7d9b924352a442861b88bc01b2aa9, type: 3}
       propertyPath: m_fontSizeBase
-      value: 60
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 2564670040729712743, guid: d2d7d9b924352a442861b88bc01b2aa9, type: 3}
       propertyPath: m_enableAutoSizing
@@ -678,11 +678,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2564670040729712743, guid: d2d7d9b924352a442861b88bc01b2aa9, type: 3}
       propertyPath: m_fontSize
-      value: 60
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 2564670040729712743, guid: d2d7d9b924352a442861b88bc01b2aa9, type: 3}
       propertyPath: m_fontSizeBase
-      value: 60
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 2564670040729712743, guid: d2d7d9b924352a442861b88bc01b2aa9, type: 3}
       propertyPath: m_enableAutoSizing

@@ -15,7 +15,7 @@ MonoBehaviour:
   DropShadowMaterial: {fileID: 2100000, guid: 89be78b02d5ede944b8933e557e33e63, type: 2}
   pickupOffsetY: {fileID: 11400000, guid: 27d075842cfc32047ba689ad0bb427b1, type: 2}
   velocity: 15
-  pickupSpeed: 15
+  pickupSpeed: 0.5
   fallDuration: 0.5
   pickupScale: {x: 1.2, y: 1.2}
   scaleSpeed: 0.3
@@ -25,3 +25,4 @@ MonoBehaviour:
   rotationAmount: 15
   rotationSpeed: 50
   defaultSortingOrder: 0
+  pickupSortingOrder: 500
