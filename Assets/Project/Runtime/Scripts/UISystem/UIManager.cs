@@ -205,7 +205,6 @@ public class UIManager : Singleton<UIManager> {
 
         await UniTask.Yield();
     }
-
     
     private async UniTask StartFadeOut() {
         HideBlackScreen();

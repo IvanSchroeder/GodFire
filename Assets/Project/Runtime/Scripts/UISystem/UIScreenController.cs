@@ -2,18 +2,19 @@ using UnityEngine;
 using UnityUtilities;
 using DG.Tweening;
 using Cysharp.Threading.Tasks;
+using UnityUtilies;
 
 [RequireComponent(typeof(Canvas))]
 [RequireComponent(typeof(CanvasGroup))]
-public class UIScreenController : MonoBehaviour {
+public class ScreenController : MonoBehaviour {
     public string ScreenName = "";
-    private Canvas ScreenCanvas;
-    private CanvasGroup ScreenCanvasGroup;
-    public bool IsShown = false;
+    private Canvas CanvasComponent;
+    private CanvasGroup CanvasGroupComponent;
+    public bool isShown = false;
 
     void Awake() {
-        ScreenCanvas = GetComponent<Canvas>();
-        ScreenCanvasGroup = GetComponent<CanvasGroup>();
+        if (CanvasComponent.IsNull()) CanvasComponent = GetComponent<Canvas>();
+        CanvasGroupComponent = GetComponent<CanvasGroup>();
     }
 
     public void ShowScreen() => SetCanvasGroupAlpha(1);
@@ -23,25 +24,13 @@ public class UIScreenController : MonoBehaviour {
     public void DisableInteractability() => SetCanvasGroupState(false);
 
     private void SetCanvasGroupState(bool state) {
-        ScreenCanvasGroup.interactable = state;
-        ScreenCanvasGroup.blocksRaycasts = state;
+        CanvasGroupComponent.interactable = state;
+        CanvasGroupComponent.blocksRaycasts = state;
     }
 
     private void SetCanvasGroupAlpha(float alpha) {
-        ScreenCanvasGroup.alpha = alpha;
-        IsShown = alpha == 1 ? true : false;
-        ScreenCanvas.enabled = IsShown;
+        CanvasGroupComponent.alpha = alpha;
+        isShown = alpha == 1 ? true : false;
+        CanvasComponent.enabled = isShown;
     }
-
-    // private async UniTask FadeCanvasGroup(float startingAlpha, float targetAlpha, float duration, bool ignoreTimeScale = false) {
-    //     float initialTime = 0;
-
-    //     while (initialTime < duration) {
-    //         SetCanvasGroupAlpha()
-
-    //         initialTime += ignoreTimeScale ? Time.unscaledDeltaTime : Time.deltaTime;
-    //     }
-
-    //     await UniTask.Yield();
-    // }
 }
